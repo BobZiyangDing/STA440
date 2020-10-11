@@ -1,0 +1,475 @@
+---
+title: "440Independent"
+author: "Ziyang Ding"
+header-includes:
+  - \usepackage{bm}
+  - \usepackage{amsmath}
+  - \usepackage{nccmath}
+  - \usepackage{amssymb}
+  - \usepackage{dsfont}
+  - \usepackage{media9}
+  - \usepackage{graphicx}
+  - \usepackage{MnSymbol,wasysym}
+  - \usepackage{subcaption}     
+  - \usepackage{textcomp}
+  - \usepackage{wrapfig}
+  - \usepackage{enumitem}
+  - \usepackage{fancyhdr}
+  - \usepackage{float}
+  - \usepackage{bm}
+  - \usepackage{afterpage}
+  - \usepackage{hyperref}
+  - \usepackage{lscape}
+  - \usepackage{tabularx}
+
+output: pdf_document
+---
+
+\newcommand{\bP}{\mathbb{P}}
+\newcommand{\bE}{\mathbb{E}}
+\newcommand{\cD}{\mathcal{D}}
+
+\newcommand{\bbeta}{\bm{\beta}}
+\newcommand{\bX}{\bm{X}}
+
+\newcommand{\A}{\mathbf{A}}
+\newcommand{\F}{\mathbf{F}}
+\newcommand{\R}{\mathbf{R}}
+\newcommand{\W}{\mathbf{W}}
+\newcommand{\B}{\mathbf{B}}
+\newcommand{\balfa}{\bm{\alpha}}
+\newcommand{\bx}{\bm{x}}
+\newcommand{\ba}{\mathbf{a}}
+\newcommand{\bu}{\mathbf{u}}
+\newcommand{\bfC}{\mathbf{C}}
+\newcommand{\bW}{\bm{W}}
+\newcommand{\bepsilon}{\bm{\epsilon}}
+\newcommand{\btheta}{\boldsymbol{\theta}}
+\newcommand{\bomega}{\boldsymbol{\omega}}
+\newcommand{\T}{\boldsymbol{\top}}
+\newcommand{\cN}{\mathcal{N}}
+\newcommand{\bTheta}{\bm{\Theta}}
+\newcommand{\bnu}{\bm{\nu}}
+
+```{r load-packages, include=F, echo=F}
+library(FedData)
+pkg_test("dplyr")
+pkg_test("ggplot2")
+pkg_test("TSA")
+pkg_test("GGally")
+pkg_test("lubridate")
+
+```
+
+
+```{r, echo=FALSE}
+raw_1 <- read.csv("./Raw/output_1.csv")
+raw_2 <- read.csv("./Raw/output_2.csv")
+raw_3 <- read.csv("./Raw/output_3.csv")
+raw_4 <- read.csv("./Raw/output_4.csv")
+raw_5 <- read.csv("./Raw/output_5.csv")
+raw_6 <- read.csv("./Raw/output_6.csv")
+raw_7 <- read.csv("./Raw/output_7.csv")
+raw_data <- do.call("rbind", list(raw_1,raw_2,raw_3,raw_4,raw_5,raw_6,raw_7))
+```
+
+
+\section{Introduction}
+
+Real estate, as a major part of the economy, has been constanly and closely monitored by investors and researchers. Since 1970 {[1]}, when most countries' statistical offices or central banks began to collect data on house prices, interest in how to predict and forecast house prices have gradually augmented, bringing out more and more sophisticated modling techniques. Due to the increased ability of modern society to collect and store more data, attempts to make prediction on real estate prices have therefore shifted to data-driven, which further improved modeling precision. 
+
+Being such a sophisticated product, real estate prices are also impacted by many factors. While most of the factors helpful in predicting the house are observable and descriptive to the house itself, such as house' size, number of bathrooms, and whether it possesses a swimming pool etc., there are also inobservable factors that also impact house prices, such as the underlying real state market economy, cyclicality of real estate prices, and so on. 
+
+Many previous researches have already proposed multiple ways of predicting house prices. From the most simple regression methods as proposed in \href{ https://www.kaggle.com/manisaurabh/house-prices-advanced-regression-technique }{[2]}, to those that account for repeated sells of houses \href{ https://rady.ucsd.edu/faculty/directory/valkanov/pub/docs/HandRE_GPTV.pdf }{[3]}, and to those that take temporal effects into consideration, such as \href{ https://medium.com/@feraguilari/time-series-analysis-modfinalproyect-b9fb23c28309 }{[4]}. Though these studies are drastically different and are definitly other researches proposing more sophisticated models , each study has a different but clear focus. Thus, it is important to make certain of the research question before creating model.
+
+Therefore, we proposes our goal of this study. The only type of house that we'll be researching into is house in Durham, NC, due to our better familiarity of the terrain. The goals include 1) understand how descriptive and observable variables affect housing prices, 2) understand how temporal effect affect housing price, 3) extract cyclical, trend, and mean-shift effect of past real estate, and 3) make short term forecast of housing prices.
+
+
+\section{EDA}
+\subsection{Data Discription}
+
+The Dataset is scraped from redfin official set \href{ https://www.redfin.com/ }{[5]}. Redfin is a real estate brokerage that was founded in 2004. It's website consist of historical purchase record of the past 3 years. We therefore scrapped these 3 years of data, ranging from 2017 April to 2020 May. This dataset contains 6962 observation. Thanks to redfin's meticulous data record, no missing value in any field was presented. Each observation is a recorded deal of house purchase. Therefore, the price is the deal price between customer and seller, which is objective enough for us to fit on. 
+
+The data set contains many covariates. Among which, there are some non-process-able string information, such as name of the community, or geographical information which is beyond the scope of our interests. Therefore, to simplify our research, we introduce the following covariates of our interest
+
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llllllll}
+\hline 
+\textbf{Name}         & \multicolumn{6}{l}{\textbf{Description}}                         & \textbf{Missing} \\ \hline
+\texttt{Price}        & \multicolumn{6}{l}{the deal price of the house}                  & $0\%$   \\
+\texttt{beds}         & \multicolumn{6}{l}{number of beds in the house}                  & $0\%$   \\
+\texttt{sold.dat}     & \multicolumn{6}{l}{the date on which the deal is settled}        & $0\%$   \\
+\texttt{baths}        & \multicolumn{6}{l}{the number of bathrooms the house has}        & $0\%$   \\
+\texttt{square.feet}  & \multicolumn{6}{l}{usable area (ft$^2$) measured in square feet} & $0\%$   \\
+\texttt{lot.size}     & \multicolumn{6}{l}{total area (ft$^2$) of the lot}               & $0\%$   \\
+\texttt{year.built}   & \multicolumn{6}{l}{the date the house was built.}                & $0\%$   \\
+\texttt{property.type}& \multicolumn{6}{l}{Townhouse, or Single family residential}      & $0\%$   \\
+\texttt{city}         & \multicolumn{6}{l}{Durham, Chapel Hill, or Morresville}          & $0\%$   \\ \hline
+\end{tabular}
+\end{table}
+
+As we've already indicated above, we're interested only in houses and apartments in Durham. Therefore, after we filter out the data, the `city` variable no longer exist. 
+
+\subsection{The real EDA}
+
+```{r, include=F}
+onlyDurham <- dplyr::filter(raw_data, city == "Durham")
+fieldNames <- c("price", "beds", "sold.dat", "baths", "square.feet", "lot.size", "year.built", "property.type")
+onlyDurham <- onlyDurham[fieldNames]
+onlyDurham$log.price <- log(onlyDurham$price)
+```
+
+
+A complete pairwise-plot has been attached in the Appendix. Below are 3 main observations (concerns) and their solutions
+
+
+
+
+
+
+\subsubsection*{Multi-collinearity}
+
+Though increased number of beds in the house need not imply the increase of square feet, increasing number of baths in the house does imply the increase square feet more directly. Notice that in figure(___), a strong collinearity is shown between the number of baths and square feet of the house, achieving an correlation of 0.7843. Thus, we should be careful in the final model output for these highly correlated covariates. More pairwise distribution between variables can be found in pair plot shown at appendix (_____)
+
+
+
+```{r, echo=F}
+cor(onlyDurham$baths, onlyDurham$square.feet)
+Heteroskedasticity <- ggplot(onlyDurham, aes(x=baths, y=square.feet)) + 
+                      geom_point(aes(color=property.type))
+Heteroskedasticity
+```
+
+```{r, echo=F}
+numericNamesMask <- unlist(lapply(onlyDurham, is.numeric))
+numericNames <- names(onlyDurham)[numericNamesMask]
+numericNamesIdx <- which(numericNamesMask)
+
+pairPlot <- ggpairs(onlyDurham, columns=numericNames, 
+            aes(color=property.type),
+            lower  = list(continuous = wrap("points", alpha = 0.3, size=0.1) ),
+            upper  = list(continuous = "cor"),
+            diag = list(continuous = "densityDiag", discrete = "barDiag", na = "naDiag") ) 
+
+
+for (i in 1:length(numericNamesIdx)) {
+
+  # Address only the diagonal elements
+  # Get plot out of plot-matrix
+  inner <- getPlot(pairPlot, i, i);
+
+  # Add ggplot2 settings (here we remove gridlines)
+  inner <- inner + theme(panel.grid = element_blank()) +
+    theme(axis.text.x = element_blank())
+
+  # Put it back into the plot-matrix
+  pairPlot <- putPlot(pairPlot, inner, i, i)
+
+  for (j in 1:length(numericNamesIdx)){
+    if((i==1 & j==1)){
+
+      # Move the upper-left legend to the far right of the plot
+      inner <- getPlot(pairPlot, i, j)
+      inner <- inner + theme(legend.position=c(length(numericNamesIdx)-0.25,0.50)) 
+      pairPlot <- putPlot(pairPlot, inner, i, j)
+    }
+    else{
+
+      # Delete the other legends
+      inner <- getPlot(pairPlot, i, j)
+      inner <- inner + theme(legend.position="none")
+      pairPlot <- putPlot(pairPlot, inner, i, j)
+    }
+  }
+}
+
+pairPlot
+```
+
+
+<!-- \begin{figure}[H] -->
+<!--     \centering -->
+<!--     \includegraphics[width=0.4\linewidth]{colinear.jpg} -->
+<!--     \caption{Strong colinearity between \textit{square.feet} vs \textit{baths}} -->
+<!-- \end{figure} -->
+
+
+\subsubsection*{Heteroskedasticity}
+
+While some strong linearity and positive correlation is evident between some predictor variables, such as `beds`, the number of beds, and `square.feet`, the usable area of the house, accompanied with the increase in these predictor variables is the increase of variance. This violates the linear regression monoskedasticity assumption. To address this, we perform log-transformation on response variable and create response variable `log.price`. Shown in the last line of the pair-plot, heteroskdasticity problem is sufficiently solved without harming positive correlation between the original response and predictors. Furthermore, distribution supports a stronger linearity becomes transformed `prices`, which is `log.price`, and its predictors.
+
+```{r, echo=F}
+
+bed_price <- ggplot(onlyDurham, aes(x=beds, y=price, color = property.type)) + 
+             geom_point() +
+             geom_smooth(method="nls",
+                         formula = y ~ a * x+b, se = F,
+                         method.args = list(start = list(a = 0.1, b = 0.1)) ) + 
+             theme(legend.position="none")
+
+
+bed_log.price <- ggplot(onlyDurham, aes(x=beds, y=log.price, color = property.type)) + 
+                geom_point(aes(color=property.type)) +
+             geom_smooth(method="nls",
+                         formula = y ~ a * x+b, se = F,
+                         method.args = list(start = list(a = 0.1, b = 0.1)) ) + 
+                theme(legend.position="top")
+
+gridExtra::grid.arrange(bed_price, bed_log.price, ncol=2)
+
+```
+
+
+
+
+<!-- \begin{figure}[H] -->
+<!--     \centering -->
+<!--     \includegraphics[width=0.8\linewidth]{price.png} -->
+<!--     \caption{Before and after log transformation} -->
+<!-- \end{figure} -->
+
+
+\subsubsection*{Stationarity}
+
+When determining the model for temporal effect, it is imperative to verify whether the stationarity assumption has been satisfied. In our case, due to the fact it is very unlikely that there are houses are sold everyday, we're create out time series by window period -- that is, we treat all the real estate deals that lie in a pre-spesified window as deals happening at the same timestep. By specifying the width of our window, we can modulate and balance the amount of information to make better inference of exogenou variables (regression coefficients) versus the flexibility and variability of temporal effect. At this point, we choose window width to be 5 days.
+
+```{r}
+onlyDurham$date.date <- mdy(onlyDurham$sold.dat)
+begin <- min(onlyDurham$date.date)
+end <- max(onlyDurham$date.date)
+onlyDurham$date.date
+windowGrid <- seq(begin, end, 10)
+```
+
+
+```{r, include=F}
+
+win_ex <- list()
+win_log.price <- list()
+win_mid_date <- c()
+for(i in 1:(length(windowGrid)-1) )
+{
+  win_start= windowGrid[i]
+  win_end  = windowGrid[i+1]
+  win_data = filter(onlyDurham, date.date >= win_start)
+  win_data = filter(win_data, date.date <  win_end)
+  
+  # print(win_data)
+  win_ex[[i]] <- win_data
+  win_log.price[[i]] <- win_data$log.price
+  mid_date <- win_start + floor((win_start - win_end )/2)
+  win_mid_date[i] <- mid_date
+  onlyDurham$win.date[onlyDurham$date.date >= win_start & onlyDurham$date.date < win_end ] <- mid_date
+}
+
+```
+
+
+```{r}
+
+ggplot(data=onlyDurham, aes(group=win.date, y=log.price)) +
+        geom_boxplot( aes(fill=win.date), outlier.shape = NA) +
+        scale_y_continuous(limits = quantile(onlyDurham$log.price, c(0.05, 0.95)))+
+    scale_x_discrete(limits=colorder,labels=)
+
+```
+
+
+When treating AR($p$) process as the dynamic generating model for Dynamic Linear Model, one verification is stationarity of the time series. We understand that the series is the intercept of the regression model. Thus, it is infeasible to verify stationarity without knowing the coefficient series. However, at this stage, we've observed that \textit{beds} help to explain most of variances, it suffices to use marginal distribution of prices given \textit{sold.dat} to verify stationarity. The results for 3 beds group, the biggest group, is shown here. Other group's stationarity EDA has been attached in Appendix. The impression from the plot shows that there is a very slight upward trend in the past 3 years. Therefore, \textit{sold.dat} should also be considered as a potential predictor variable in the regression model.
+
+<!-- \begin{figure}[H] -->
+<!--     \centering -->
+<!--     \includegraphics[width=\linewidth]{3bed.jpg} -->
+<!--     \caption{3 bed Stationarity} -->
+<!-- \end{figure} -->
+
+
+
+\vspace{20pt}
+
+<!-- \printbibliography -->
+
+<!-- \begin{thebibliography}{9} -->
+<!-- \bibitem{Jin, B., Guo, J., He, D. et al.} -->
+<!-- Jin, B., Guo, J., He, D. et al. -->
+<!-- \textit{Adaptive Kalman filtering based on optimal autoregressive predictive model}. -->
+<!-- GPS Solut 21, 307–317 (2017). https://doi.org/10.1007/s10291-016-0561-x -->
+
+<!-- \bibitem{Marko Laine} -->
+<!-- Marko Laine -->
+<!-- \textit{Introduction to Dynamic Linear Models for Time Series Analysis}. -->
+<!-- arXiv:1903.11309v2 [stat.ME] 21 May 2019 -->
+
+<!-- \bibitem{Fernando Aguilar} -->
+<!-- Fernando Aguilar -->
+<!-- \textit{Time Series Analysis on Zillow’s Housing Data}. -->
+<!-- https://medium.com/ 15 Jul 2019 -->
+
+<!-- \bibitem{Whatever} -->
+<!-- \textit{House-Prices-Advanced-Regression-Technique}. -->
+<!-- https://kaggle.com/ 13 Sep 2020 -->
+
+<!-- \bibitem{Whatever} -->
+<!-- \textit{Redfin}. -->
+<!-- https://www.redfin.com/ 13 Sep 2020 -->
+
+
+<!-- \end{thebibliography} -->
+
+
+\section*{Methodology}
+
+From the introduction above, we necessarily define our model here to help you understanding the modeling process and our notation. 
+
+\subsection*{Regression (Observation) Model}
+
+A house's individual regression features are stated above at \textreferencemark. The regression model is defined as
+
+$$
+\begin{aligned}
+    y_{ti} &= \alpha_{t} + \mathbf{\beta}\bm{x}_{ti} + \nu\\
+    \nu &\sim \mathcal{N}(0, v)
+\end{aligned}
+$$
+
+Where $y_{ti}$ is the response, the log transformed \textit{price} (reason for transformation be explained in EDA section). $\alpha_t$ is the time varying intercept which will be discussed later. $\bm{\beta}$ is the regression coefficient, and $\bm{x_{ti}}$ is the ith observation at time $t$, which is a house vector.
+
+\subsection*{Time Series (Dynamic) Model}
+
+The questions then proceed into the transition of $\alpha_t$: what is the dependencies of $\alpha_t$? How does $\alpha_t$ evolve over time?
+
+Here, we pick a simple AR(P) process for $\alpha_t$:
+
+$$
+\begin{aligned}
+    \alpha_t &= \sum_{i=1}^p \theta_i \alpha_{t-i} + \omega \\
+    \omega &\sim \cN(0, w)
+\end{aligned}
+$$
+
+However, the above parametrization requires us to take-in many timesteps value to predict $\alpha_t$, we may simply it by vectorizing the expression into the following:
+
+$$
+\begin{aligned}
+    \bm{\alpha}_t = 
+    \begin{bmatrix}
+    \alpha_t\\
+    \alpha_{t-1}\\
+    \alpha_{t-2}\\
+    \vdots\\
+    \alpha_{t-p+1}\\
+    \end{bmatrix}
+    &= 
+    \begin{bmatrix}
+    \theta_1&\theta_2   &\theta_3   &\dots  &\theta_p\\
+    1       &0          &0          &\dots  &0      \\
+    0       &1          &0          &\dots  &0      \\
+    \vdots  & \vdots    & \vdots    &\vdots &\vdots\\
+    0       &0          &0          &\dots  &1      \\
+    \end{bmatrix}
+    \begin{bmatrix}
+    \alpha_{t-1}\\
+    \alpha_{t-2}\\
+    \alpha_{t-3}\\
+    \vdots\\
+    \alpha_{t-p}\\
+    \end{bmatrix}
+    =
+    \bTheta \balfa_{t-1}
+\end{aligned}
+$$
+
+In this way, transition becomes easy, as dependency rely on only the past timestep. 
+
+\subsection*{Combined Model}
+
+We end up with the model as the following
+
+$$
+\begin{aligned}
+    \balfa_t &= \bTheta\balfa_{t-1} + \mathbf{W}_t\\
+    \bm{y}_{t} &= \bm{1} \balfa_t + \bbeta \bX_t + \bnu_t\\
+    \mathbf{W}_t &\sim \cN(\bm{0} , w\bm{I})\\
+    \bnu_t &\sim \cN(\bm{0}, v\bm{I}) \\
+    \bm{1} &:=  
+    \begin{bmatrix}
+    1& 0& 0& 0& 0\\
+    1& 0& 0& 0& 0\\
+    1& 0& 0& 0& 0\\
+    \vdots& \vdots& \vdots& \vdots& \vdots\\
+    1& 0& 0& 0& 0\\
+    \end{bmatrix}
+\end{aligned}
+$$
+
+
+
+
+
+\newpage
+
+\section*{Appendix}
+
+
+
+
+<!-- \begin{figure}[H] -->
+<!--     \centering -->
+<!--     \includegraphics[width=\linewidth]{3bed.jpg} -->
+<!--     \caption{3 bed Stationarity} -->
+<!-- \end{figure} -->
+
+<!-- \begin{figure}[H] -->
+<!--     \centering -->
+<!--     \includegraphics[width=\linewidth]{4bed.jpg} -->
+<!--     \caption{4 bed Stationarity} -->
+<!-- \end{figure} -->
+
+<!-- \begin{figure}[H] -->
+<!--     \centering -->
+<!--     \includegraphics[width=\linewidth]{5bed.jpg} -->
+<!--     \caption{5 bed Stationarity} -->
+<!-- \end{figure} -->
+
+<!-- \begin{figure}[H] -->
+<!--     \centering -->
+<!--     \includegraphics[width=0.6\linewidth]{PropertyType.jpg} -->
+<!--     \caption{5 bed Stationarity} -->
+<!-- \end{figure} -->
+
+<!-- \begin{figure}[H] -->
+<!--     \centering -->
+<!--     \includegraphics[width=0.6\linewidth]{City.jpg} -->
+<!--     \caption{5 bed Stationarity} -->
+<!-- \end{figure} -->
+
+
+<!-- \begin{figure}[!htb] -->
+<!--     \centering -->
+<!--     \includegraphics[width=\linewidth]{BIG.jpg} -->
+<!--     \caption{Pair plot of all variables} -->
+<!-- \end{figure} -->
+
+
+    
+
+
+{\sc Last Revised: September 13, 2020}
+
+Some reference
+
+\href{ https://www.dallasfed.org/-/media/documents/institute/wpapers/2014/0208.pdf }{[1]} https://www.dallasfed.org/-/media/documents/institute/wpapers/2014/0208.pdf
+
+\href{ https://www.kaggle.com/manisaurabh/house-prices-advanced-regression-technique }{[2]}, 
+https://www.kaggle.com/manisaurabh/house-prices-advanced-regression-technique
+
+\href{ https://rady.ucsd.edu/faculty/directory/valkanov/pub/docs/HandRE_GPTV.pdf }{[3]}, 
+https://rady.ucsd.edu/faculty/directory/valkanov/pub/docs/HandRE_GPTV.pdf
+
+\href{ https://medium.com/@feraguilari/time-series-analysis-modfinalproyect-b9fb23c28309 }{[4]}.
+https://medium.com/@feraguilari/time-series-analysis-modfinalproyect-b9fb23c28309 
+
+\href{ https://www.redfin.com/ }{[5]}.
+https://www.redfin.com/
