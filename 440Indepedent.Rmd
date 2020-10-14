@@ -21,7 +21,7 @@ header-includes:
   - \usepackage{hyperref}
   - \usepackage{lscape}
   - \usepackage{tabularx}
-
+  - \usepackage[ruled,vlined]{algorithm2e}
 output: pdf_document
 ---
 
@@ -50,19 +50,25 @@ output: pdf_document
 \newcommand{\cN}{\mathcal{N}}
 \newcommand{\bTheta}{\bm{\Theta}}
 \newcommand{\bnu}{\bm{\nu}}
+\newcommand{\balpha}{\bm{\alpha}}
 
-```{r load-packages, include=F, echo=F}
+```{r load packages, include=F, echo=F}
 library(FedData)
 pkg_test("dplyr")
 pkg_test("ggplot2")
 pkg_test("TSA")
 pkg_test("GGally")
 pkg_test("lubridate")
-
+pkg_test("reshape2")
+pkg_test("ggcorrplot")
+pkg_test("geosphere")
+pkg_test("tinytex")
+pkg_test("fastDummies")
+pkg_test("MASS")
 ```
 
 
-```{r, echo=FALSE}
+```{r load data, include=FALSE}
 raw_1 <- read.csv("./Raw/output_1.csv")
 raw_2 <- read.csv("./Raw/output_2.csv")
 raw_3 <- read.csv("./Raw/output_3.csv")
@@ -71,6 +77,7 @@ raw_5 <- read.csv("./Raw/output_5.csv")
 raw_6 <- read.csv("./Raw/output_6.csv")
 raw_7 <- read.csv("./Raw/output_7.csv")
 raw_data <- do.call("rbind", list(raw_1,raw_2,raw_3,raw_4,raw_5,raw_6,raw_7))
+
 ```
 
 
@@ -92,7 +99,6 @@ The Dataset is scraped from redfin official set \href{ https://www.redfin.com/ }
 
 The data set contains many covariates. Among which, there are some non-process-able string information, such as name of the community, or geographical information which is beyond the scope of our interests. Therefore, to simplify our research, we introduce the following covariates of our interest
 
-
 \begin{table}[h]
 \centering
 \begin{tabular}{llllllll}
@@ -104,8 +110,10 @@ The data set contains many covariates. Among which, there are some non-process-a
 \texttt{baths}        & \multicolumn{6}{l}{the number of bathrooms the house has}        & $0\%$   \\
 \texttt{square.feet}  & \multicolumn{6}{l}{usable area (ft$^2$) measured in square feet} & $0\%$   \\
 \texttt{lot.size}     & \multicolumn{6}{l}{total area (ft$^2$) of the lot}               & $0\%$   \\
-\texttt{year.built}   & \multicolumn{6}{l}{the date the house was built.}                & $0\%$   \\
+\texttt{house.age}    & \multicolumn{6}{l}{age (years) of the house when purchased}      & $0\%$   \\
 \texttt{property.type}& \multicolumn{6}{l}{Townhouse, or Single family residential}      & $0\%$   \\
+\texttt{latitude}     & \multicolumn{6}{l}{latitude of the house}                        & $0\%$   \\
+\texttt{longitude}    & \multicolumn{6}{l}{longitude of the house}                       & $0\%$   \\
 \texttt{city}         & \multicolumn{6}{l}{Durham, Chapel Hill, or Morresville}          & $0\%$   \\ \hline
 \end{tabular}
 \end{table}
@@ -114,35 +122,37 @@ As we've already indicated above, we're interested only in houses and apartments
 
 \subsection{The real EDA}
 
-```{r, include=F}
+```{r subset columns and trans Date format, include=F}
+
+
+
 onlyDurham <- dplyr::filter(raw_data, city == "Durham")
-fieldNames <- c("price", "beds", "sold.dat", "baths", "square.feet", "lot.size", "year.built", "property.type")
+
+fieldNames <- c("price", "beds", "sold.dat", "baths", "square.feet", "lot.size", "year.built", "property.type", "latitude", "longitude")
 onlyDurham <- onlyDurham[fieldNames]
 onlyDurham$log.price <- log(onlyDurham$price)
+onlyDurham$date.date <- mdy(onlyDurham$sold.dat)
+onlyDurham$house.age <- year(onlyDurham$date.date) - onlyDurham$year.built
 ```
 
-
+The following figure indicates the extreme uneven number of observation for 3 types of houses: Conda/Co-op, Townhouse, and Single Family Residential. 
 A complete pairwise-plot has been attached in the Appendix. Below are 3 main observations (concerns) and their solutions
 
-
-
-
-
+```{r property type count bar plot, echo=F, fig.width=4, fig.height=2}
+ggplot(data=onlyDurham, aes(x = property.type, fill=property.type), ) + geom_bar( stat = "count") + theme(axis.title.x = element_blank())
+```
 
 \subsubsection*{Multi-collinearity}
 
-Though increased number of beds in the house need not imply the increase of square feet, increasing number of baths in the house does imply the increase square feet more directly. Notice that in figure(___), a strong collinearity is shown between the number of baths and square feet of the house, achieving an correlation of 0.7843. Thus, we should be careful in the final model output for these highly correlated covariates. More pairwise distribution between variables can be found in pair plot shown at appendix (_____)
+Though increased number of beds in the house need not imply the increase of square feet, increasing number of baths in the house does imply the increase square feet more directly. Notice that in figure(_____), a strong collinearity is shown between the number of baths and square feet of the house, achieving an correlation of 0.7843. Thus, we should be careful in the final model output for these highly correlated covariates More pairwise distribution between variables can be found in pair plot shown at appendix (_____)
 
-
-
-```{r, echo=F}
+```{r Collinearity, echo=F}
 cor(onlyDurham$baths, onlyDurham$square.feet)
-Heteroskedasticity <- ggplot(onlyDurham, aes(x=baths, y=square.feet)) + 
+Collinearity <- ggplot(onlyDurham, aes(x=baths, y=square.feet)) + 
                       geom_point(aes(color=property.type))
-Heteroskedasticity
 ```
 
-```{r, echo=F}
+```{r Big Pair Plot, include=F, warning=FALSE, eval=F}
 numericNamesMask <- unlist(lapply(onlyDurham, is.numeric))
 numericNames <- names(onlyDurham)[numericNamesMask]
 numericNamesIdx <- which(numericNamesMask)
@@ -150,7 +160,7 @@ numericNamesIdx <- which(numericNamesMask)
 pairPlot <- ggpairs(onlyDurham, columns=numericNames, 
             aes(color=property.type),
             lower  = list(continuous = wrap("points", alpha = 0.3, size=0.1) ),
-            upper  = list(continuous = "cor"),
+            upper  = list(continuous = "blank"),
             diag = list(continuous = "densityDiag", discrete = "barDiag", na = "naDiag") ) 
 
 
@@ -188,19 +198,11 @@ for (i in 1:length(numericNamesIdx)) {
 pairPlot
 ```
 
-
-<!-- \begin{figure}[H] -->
-<!--     \centering -->
-<!--     \includegraphics[width=0.4\linewidth]{colinear.jpg} -->
-<!--     \caption{Strong colinearity between \textit{square.feet} vs \textit{baths}} -->
-<!-- \end{figure} -->
-
-
 \subsubsection*{Heteroskedasticity}
 
 While some strong linearity and positive correlation is evident between some predictor variables, such as `beds`, the number of beds, and `square.feet`, the usable area of the house, accompanied with the increase in these predictor variables is the increase of variance. This violates the linear regression monoskedasticity assumption. To address this, we perform log-transformation on response variable and create response variable `log.price`. Shown in the last line of the pair-plot, heteroskdasticity problem is sufficiently solved without harming positive correlation between the original response and predictors. Furthermore, distribution supports a stronger linearity becomes transformed `prices`, which is `log.price`, and its predictors.
 
-```{r, echo=F}
+```{r Heteroskedasticity, echo=F, warning=F}
 
 bed_price <- ggplot(onlyDurham, aes(x=beds, y=price, color = property.type)) + 
              geom_point() +
@@ -221,34 +223,24 @@ gridExtra::grid.arrange(bed_price, bed_log.price, ncol=2)
 
 ```
 
-
-
-
-<!-- \begin{figure}[H] -->
-<!--     \centering -->
-<!--     \includegraphics[width=0.8\linewidth]{price.png} -->
-<!--     \caption{Before and after log transformation} -->
-<!-- \end{figure} -->
-
-
 \subsubsection*{Stationarity}
 
 When determining the model for temporal effect, it is imperative to verify whether the stationarity assumption has been satisfied. In our case, due to the fact it is very unlikely that there are houses are sold everyday, we're create out time series by window period -- that is, we treat all the real estate deals that lie in a pre-spesified window as deals happening at the same timestep. By specifying the width of our window, we can modulate and balance the amount of information to make better inference of exogenou variables (regression coefficients) versus the flexibility and variability of temporal effect. At this point, we choose window width to be 5 days.
 
-```{r}
-onlyDurham$date.date <- mdy(onlyDurham$sold.dat)
+
+```{r make windowed data, include=F, warning=F}
+win_size = 5
+onlyDurham <- onlyDurham[order(onlyDurham$date.date),]
 begin <- min(onlyDurham$date.date)
 end <- max(onlyDurham$date.date)
-onlyDurham$date.date
-windowGrid <- seq(begin, end, 10)
-```
-
-
-```{r, include=F}
+windowGrid <- seq(begin, end, win_size)
 
 win_ex <- list()
 win_log.price <- list()
+win_mean.price <- c()
 win_mid_date <- c()
+
+onlyDurham$win.date = 0
 for(i in 1:(length(windowGrid)-1) )
 {
   win_start= windowGrid[i]
@@ -256,144 +248,225 @@ for(i in 1:(length(windowGrid)-1) )
   win_data = filter(onlyDurham, date.date >= win_start)
   win_data = filter(win_data, date.date <  win_end)
   
-  # print(win_data)
   win_ex[[i]] <- win_data
   win_log.price[[i]] <- win_data$log.price
   mid_date <- win_start + floor((win_start - win_end )/2)
   win_mid_date[i] <- mid_date
-  onlyDurham$win.date[onlyDurham$date.date >= win_start & onlyDurham$date.date < win_end ] <- mid_date
+  win_mean.price[i] <- mean(win_data$log.price)
+  onlyDurham$win.date <- ifelse(between(onlyDurham$date.date, win_start, win_end), 
+                                format.Date(mid_date), onlyDurham$win.date)
 }
 
 ```
 
+```{r stationarity plot, echo=F, warning=F, fig.height=2, fig.width=8}
+breaks = seq(begin, end, 30)
 
-```{r}
-
-ggplot(data=onlyDurham, aes(group=win.date, y=log.price)) +
+ggplot(data=onlyDurham, aes(group=win.date, y=log.price)) + theme(legend.position = "none") +
         geom_boxplot( aes(fill=win.date), outlier.shape = NA) +
-        scale_y_continuous(limits = quantile(onlyDurham$log.price, c(0.05, 0.95)))+
-    scale_x_discrete(limits=colorder,labels=)
+        scale_x_date(breaks = breaks) +
+        scale_y_continuous(limits = quantile(onlyDurham$log.price, c(0.005, 0.99))) +
+  labs(title = "log price at each time window", x= "time window", y = "log price")
 
 ```
 
+From the plot in figure (_____), we found that there is a slight upward trend across in the distribution of logarithm of house prices. Though this distribution is marginalized by other exogenous variable, but it is helpful for us identify that the time the house is sold: `sold.dat` should also be considered as a potential variable in the regression. Note that it is also possible to add in moving average (MA) term in the termporal effect to model such trend, we choose to simplify this by problem by include it into the regression effect, and only including Autoregressive factors in the temporal effect.
 
-When treating AR($p$) process as the dynamic generating model for Dynamic Linear Model, one verification is stationarity of the time series. We understand that the series is the intercept of the regression model. Thus, it is infeasible to verify stationarity without knowing the coefficient series. However, at this stage, we've observed that \textit{beds} help to explain most of variances, it suffices to use marginal distribution of prices given \textit{sold.dat} to verify stationarity. The results for 3 beds group, the biggest group, is shown here. Other group's stationarity EDA has been attached in Appendix. The impression from the plot shows that there is a very slight upward trend in the past 3 years. Therefore, \textit{sold.dat} should also be considered as a potential predictor variable in the regression model.
-
-<!-- \begin{figure}[H] -->
-<!--     \centering -->
-<!--     \includegraphics[width=\linewidth]{3bed.jpg} -->
-<!--     \caption{3 bed Stationarity} -->
-<!-- \end{figure} -->
+Besides, it would be very helpful to identify the AR(p) terms by looking checking ACF and PACF plots. Below in figure (____) shows the plots mentioned. We observe that lag 1,3,4,5,7 are statistically significantly correlated with the term. Therefore, we will start incorporating 7 autocorrelation terms in our model. Incorporating less or more terms will incorporated in the model validation section.
 
 
+```{r ggplot PACF plot func, include=F, warning=F}
+ggplot.corr <- function(data, lag.max = 24, ci = 0.95, large.sample.size = TRUE, horizontal = TRUE,...) {
+  
+  require(ggplot2)
+  require(dplyr)
+  require(cowplot)
+  
+  if(horizontal == TRUE) {numofrow <- 1} else {numofrow <- 2}
+  
+  list.acf <- acf(data, lag.max = lag.max, type = "correlation", plot = FALSE)
+  N <- as.numeric(list.acf$n.used)
+  df1 <- data.frame(lag = list.acf$lag, acf = list.acf$acf)
+  df1$lag.acf <- dplyr::lag(df1$acf, default = 0)
+  df1$lag.acf[2] <- 0
+  df1$lag.acf.cumsum <- cumsum((df1$lag.acf)^2)
+  df1$acfstd <- sqrt(1/N * (1 + 2 * df1$lag.acf.cumsum))
+  df1$acfstd[1] <- 0
+  # df1 <- select(df1, lag, acf, acfstd)
+  
+  list.pacf <- acf(data, lag.max = lag.max, type = "partial", plot = FALSE)
+  df2 <- data.frame(lag = list.pacf$lag,pacf = list.pacf$acf)
+  df2$pacfstd <- sqrt(1/N)
+  
+  if(large.sample.size == TRUE) {
+    plot.acf <- ggplot(data = df1, aes( x = lag, y = acf)) +
+    geom_area(aes(x = lag, y = qnorm((1+ci)/2)*acfstd), fill = "#B9CFE7") +
+    geom_area(aes(x = lag, y = -qnorm((1+ci)/2)*acfstd), fill = "#B9CFE7") +
+    geom_col(fill = "#4373B6", width = 0.7) +
+    scale_x_continuous(breaks = seq(0,max(df1$lag),6)) +
+    scale_y_continuous(name = element_blank(), 
+                       limits = c(min(df1$acf,df2$pacf),1)) +
+    ggtitle("ACF") +
+    theme_bw()
+    
+    plot.pacf <- ggplot(data = df2, aes(x = lag, y = pacf)) +
+    geom_area(aes(x = lag, y = qnorm((1+ci)/2)*pacfstd), fill = "#B9CFE7") +
+    geom_area(aes(x = lag, y = -qnorm((1+ci)/2)*pacfstd), fill = "#B9CFE7") +
+    geom_col(fill = "#4373B6", width = 0.7) +
+    scale_x_continuous(breaks = seq(0,max(df2$lag, na.rm = TRUE),6)) +
+    scale_y_continuous(name = element_blank(),
+                       limits = c(min(df1$acf,df2$pacf),1)) +
+    ggtitle("PACF") +
+    theme_bw()
+  }
+  else {
+    plot.acf <- ggplot(data = df1, aes( x = lag, y = acf)) +
+    geom_col(fill = "#4373B6", width = 0.7) +
+    geom_hline(yintercept = qnorm((1+ci)/2)/sqrt(N), 
+               colour = "sandybrown",
+               linetype = "dashed") + 
+    geom_hline(yintercept = - qnorm((1+ci)/2)/sqrt(N), 
+               colour = "sandybrown",
+               linetype = "dashed") + 
+    scale_x_continuous(breaks = seq(0,max(df1$lag),6)) +
+    scale_y_continuous(name = element_blank(), 
+                       limits = c(min(df1$acf,df2$pacf),1)) +
+    ggtitle("ACF") +
+    theme_bw()
+    
+    plot.pacf <- ggplot(data = df2, aes(x = lag, y = pacf)) +
+    geom_col(fill = "#4373B6", width = 0.7) +
+    geom_hline(yintercept = qnorm((1+ci)/2)/sqrt(N), 
+               colour = "sandybrown",
+               linetype = "dashed") + 
+    geom_hline(yintercept = - qnorm((1+ci)/2)/sqrt(N), 
+               colour = "sandybrown",
+               linetype = "dashed") + 
+    scale_x_continuous(breaks = seq(0,max(df2$lag, na.rm = TRUE),6)) +
+    scale_y_continuous(name = element_blank(),
+                       limits = c(min(df1$acf,df2$pacf),1)) +
+    ggtitle("PACF") +
+    theme_bw()
+  }
+  cowplot::plot_grid(plot.acf, plot.pacf, nrow = numofrow)
+}
+```
 
-\vspace{20pt}
+```{r PACF store plot, include=F, fig.height=2, fig.width=6, warning=F}
+temp <- ggplot.corr(data = win_mean.price, lag.max = 25, ci= 0.95, large.sample.size = FALSE, horizontal = TRUE)
+```
 
-<!-- \printbibliography -->
-
-<!-- \begin{thebibliography}{9} -->
-<!-- \bibitem{Jin, B., Guo, J., He, D. et al.} -->
-<!-- Jin, B., Guo, J., He, D. et al. -->
-<!-- \textit{Adaptive Kalman filtering based on optimal autoregressive predictive model}. -->
-<!-- GPS Solut 21, 307–317 (2017). https://doi.org/10.1007/s10291-016-0561-x -->
-
-<!-- \bibitem{Marko Laine} -->
-<!-- Marko Laine -->
-<!-- \textit{Introduction to Dynamic Linear Models for Time Series Analysis}. -->
-<!-- arXiv:1903.11309v2 [stat.ME] 21 May 2019 -->
-
-<!-- \bibitem{Fernando Aguilar} -->
-<!-- Fernando Aguilar -->
-<!-- \textit{Time Series Analysis on Zillow’s Housing Data}. -->
-<!-- https://medium.com/ 15 Jul 2019 -->
-
-<!-- \bibitem{Whatever} -->
-<!-- \textit{House-Prices-Advanced-Regression-Technique}. -->
-<!-- https://kaggle.com/ 13 Sep 2020 -->
-
-<!-- \bibitem{Whatever} -->
-<!-- \textit{Redfin}. -->
-<!-- https://www.redfin.com/ 13 Sep 2020 -->
+```{r Plot PACF, echo=F, fig.height=2, fig.width=6, warning=F}
+temp
+```
 
 
-<!-- \end{thebibliography} -->
+\subsubsection*{Engineered Feature and Interaction}
+
+We're interested in the difference between number of beds and baths and its relationship with logarithm of house price `log.price`. By creating new variable `room.Diff`, which means how much more baths does the house have than beds, we found such feature creates distinct effects across Single Family Residential, Townhouse, and Condo in affecting log of price. In figure (_____), we can observe heterogeneity across 3 type of houses. Therefore, interaction between the difference and house type should also be added to our model.
+
+```{r Interaction and bed difference, echo=F, warning=F, fig.height=4, fig.width=6}
+onlyDurham$room.Diff <- onlyDurham$baths - onlyDurham$beds
+
+ggplot(data = onlyDurham, aes(x=room.Diff, y=log.price, color=property.type)) + 
+  geom_point(alpha=0.8, size=1) +
+  geom_smooth(method="nls",
+              formula = y ~ a * x+b, se = F,
+              method.args = list(start = list(a = 0.1, b = 0.1)) ) + 
+              theme(legend.position="top")
+```
+
+Besides, we're interested in incorporating simple spatial information for additional prediction power. Therefore, we engineered the new covariate `dist.duke`, indicating the distance of the house to Duke. This is approximately calculated via shortest distance of 2 points on a ellipsoid indicated by latitude and longtitude of the house and Duke University. Then, as in figure (______) shows, we anticipate longer distance to Duke will result in a lower housing price.
+
+```{r Distance to Duke, echo=F, warning=F, fig.height=4, fig.width=4}
+Duke <- c(36.0014, -78.9382)
+onlyDurham$dist.duke <- distm(cbind(onlyDurham$latitude, onlyDurham$longitude), Duke , fun = distHaversine)
+ggplot(data = onlyDurham, aes(x=dist.duke, y=log.price, color=property.type)) + 
+  geom_point(alpha=0.8, size=1) +
+  geom_smooth(method="nls",
+              formula = y ~ a * x+b, se = F,
+              method.args = list(start = list(a = 0.1, b = 0.1)) ) + 
+              theme(legend.position="top")
+```
+
 
 
 \section*{Methodology}
 
-From the introduction above, we necessarily define our model here to help you understanding the modeling process and our notation. 
+We define our model as a regression model on top of a AR(P) model. 
 
 \subsection*{Regression (Observation) Model}
 
-A house's individual regression features are stated above at \textreferencemark. The regression model is defined as
+After EDA, we determines to use response as `log.price`: the logarithm of the house deal price. The covariate predictors are `beds`, `sold.dat`, `baths`, `square.feet`, `lot.size`, `house.age`, `property.type`, `city`, `room.Diff`, `dist.Duke`, and finally `room.Diff` interact with `property.type`. The regression model is 
 
-$$
-\begin{aligned}
-    y_{ti} &= \alpha_{t} + \mathbf{\beta}\bm{x}_{ti} + \nu\\
-    \nu &\sim \mathcal{N}(0, v)
-\end{aligned}
-$$
+\begin{align}
+    y_{t_i} &= 
+    \beta_{\text{beds}}\textbf{ beds}_{t_i} + \beta_{\text{sold date}}\textbf{ sold date}_{t_i} + \beta_{\text{beds}}\textbf{ baths}_{t_i} + \beta_{\text{square feet}}\textbf{ square feet}_{t_i} + \\
+    &\quad \beta_{\text{lot size}}\textbf{ lot size}_{t_i} + \beta_{\text{house age}}\textbf{ house age}_{t_i}+ \beta_{\text{property type}} \textbf{ property type}_{t_i} +\\
+    &\quad \beta_{\text{city}}\textbf{ city}_{t_i}+  \beta_{\text{room difference}}\textbf{ room Diff}_{t_i}+ \beta_{\text{dist. to Duke}}\textbf{ dist. to Duke}_{t_i}+ \\
+    &\quad \beta_{\text{interaction}}\textbf{ room Diff}_{t_i}\times \textbf{property type}_{t_i} + \\
+    &\quad \alpha_t + \nu_t\\
+    \nu_t &\sim \cN(0, v)
+\end{align}
 
-Where $y_{ti}$ is the response, the log transformed \textit{price} (reason for transformation be explained in EDA section). $\alpha_t$ is the time varying intercept which will be discussed later. $\bm{\beta}$ is the regression coefficient, and $\bm{x_{ti}}$ is the ith observation at time $t$, which is a house vector.
+Where $y_{t_i}$ is the response of the $i^{th}$ house sold on the $t^th$ window date, which is its logarithm of deal price. (notice that suppose for each window $t \in \{1,2,3, T\}$, there are $n_t$ sold houses in the $t^{th}$ window. Then $n_t$ need not equal for all $t$). The rests are predictive variables. $\alpha_t$ is an time varying intercept which will be modeled by the AR(P) model described in the next session. $\nu_t$ is an additional observation uncertainty. To simply our modeling process, we take $\nu_t$ to have constant variance. Also, to simplify our notation, we write vectorized equation by merging line $(1),(2),(3),(4)$. The compact form is denoted as
 
-\subsection*{Time Series (Dynamic) Model}
+\begin{align*}
+    \bm{y}_t &= \alpha_t\bm{1}_{n_t} + \bm{X}_t\bbeta + \bm{\nu}_t\\
+    \bm{\nu}_t &\sim \cN(\bm{0}, v \bm{I}_{n_t})
+\end{align*}
 
-The questions then proceed into the transition of $\alpha_t$: what is the dependencies of $\alpha_t$? How does $\alpha_t$ evolve over time?
+\subsection*{Time Series Model}
 
-Here, we pick a simple AR(P) process for $\alpha_t$:
+We construct the AR(p) model to model the underlying intercept $\alpha_t$ as described above in the regression model. As we've already indicated in EDA section, we'll choose $p =7$ for our
 
-$$
-\begin{aligned}
-    \alpha_t &= \sum_{i=1}^p \theta_i \alpha_{t-i} + \omega \\
-    \omega &\sim \cN(0, w)
-\end{aligned}
-$$
+\begin{align*}
+    \alpha_t &= \sum_{i=1}^7 \theta_i \alpha_{t-i} + \omega_t \\
+    \omega_t &\sim \cN(0, w)
+\end{align*}
 
 However, the above parametrization requires us to take-in many timesteps value to predict $\alpha_t$, we may simply it by vectorizing the expression into the following:
 
-$$
-\begin{aligned}
+\begin{align*}
     \bm{\alpha}_t = 
     \begin{bmatrix}
     \alpha_t\\
     \alpha_{t-1}\\
     \alpha_{t-2}\\
     \vdots\\
-    \alpha_{t-p+1}\\
+    \alpha_{t-7}\\
     \end{bmatrix}
     &= 
     \begin{bmatrix}
-    \theta_1&\theta_2   &\theta_3   &\dots  &\theta_p\\
+    \theta_1&\theta_2   &\theta_3   &\dots  &\theta_7\\
     1       &0          &0          &\dots  &0      \\
     0       &1          &0          &\dots  &0      \\
     \vdots  & \vdots    & \vdots    &\vdots &\vdots\\
-    0       &0          &0          &\dots  &1      \\
+    0       &0          &0          &\dots  &0      \\
     \end{bmatrix}
     \begin{bmatrix}
     \alpha_{t-1}\\
     \alpha_{t-2}\\
     \alpha_{t-3}\\
     \vdots\\
-    \alpha_{t-p}\\
+    \alpha_{t-7}\\
     \end{bmatrix}
     =
     \bTheta \balfa_{t-1}
-\end{aligned}
-$$
+\end{align*}
 
-In this way, transition becomes easy, as dependency rely on only the past timestep. 
+In this way, transition becomes easy, as dependency rely on only the past one timestep. 
 
 \subsection*{Combined Model}
 
 We end up with the model as the following
 
-$$
-\begin{aligned}
-    \balfa_t &= \bTheta\balfa_{t-1} + \mathbf{W}_t\\
+\begin{align*}
+    \balfa_t &= \bTheta\balfa_{t-1} + \bm{W}_t\\
     \bm{y}_{t} &= \bm{1} \balfa_t + \bbeta \bX_t + \bnu_t\\
-    \mathbf{W}_t &\sim \cN(\bm{0} , w\bm{I})\\
+    \bm{W}_t &\sim \cN(\bm{0} , w\bm{I})\\
     \bnu_t &\sim \cN(\bm{0}, v\bm{I}) \\
-    \bm{1} &:=  
+    \bm{1} &:= 
     \begin{bmatrix}
     1& 0& 0& 0& 0\\
     1& 0& 0& 0& 0\\
@@ -401,64 +474,362 @@ $$
     \vdots& \vdots& \vdots& \vdots& \vdots\\
     1& 0& 0& 0& 0\\
     \end{bmatrix}
-\end{aligned}
-$$
+\end{align*}
 
 
+\section{Parameter Inference}
+
+The Model requires statistical inference uppon the following parameters:
+
+
+$$\{w, v, \bbeta, \btheta, \balpha_{1:T}\}$$
+\begin{algorithm}[H]
+\SetAlgoLined
+\KwResult{A short algorithm of initializing reservoir weights with insured Echo State Property. Through empirical experiments, we recommend setting $\eta_1 = 0.97, \eta_2 = 0.85, \bm{\mu} = -2, \epsilon=1 $ . }
+\textbf{Initialize}: $\bP((\theta_1, \dots, \theta_7)^\top ), \bP(w), \bP(v)$ via pre-set prior distribution \\
+\While{not converged}
+ {
+    \textbf{Calculate}: posterior mean and covariance for $\balpha_{t} | \cD_t$: $m_{t}, C_{t}$ $\forall t \in {1: T}$ via forward filtering algorithm in Appendix \\
+    \textbf{Sample}: $\balpha_{t} | \cD_T$ from $m_{t}^*, C_{t}^*, \forall t \in {1: T}$ by backward smoothing\\
+    \textbf{Sample}: $\btheta ,\phi = w^{-1} | \bX, \cD_T, \bbeta$ by first sampling $\phi = w^{-1} | \bX, \cD_T, \bbeta$ and then $\btheta | \bX, \cD_T, \bbeta, \phi$ \\
+    \textbf{Sample}: $\bbeta | \bX, \kappa, \bm{y}_t, \tau =v^{-1}$ and then sample $\tau =v^{-1} | \bX, \kappa, \bm{y}_t, \bbeta$
+ }
+\textbf{Return}: $w, v, \bbeta, \btheta_{1:T}$
+\caption{parameter inference algorithm}
+\end{algorithm}
+
+
+<!-------------------------------------------MODELING--------------------------------------------->
+<!-------------------------------------------MODELING--------------------------------------------->
+<!-------------------------------------------MODELING--------------------------------------------->
+
+```{r make model data}
+
+model_data_raw <- onlyDurham
+model_data_raw$sold.dat <-  as.numeric(mdy(onlyDurham$sold.dat))
+model_data_raw$single <- ifelse(model_data_raw$property.type == "Single Family Residential",1,0)
+model_data_raw$townhouse <- ifelse(model_data_raw$property.type == "Townhouse",1,0)
+model_data_raw$itr_townhouse <- model_data_raw$townhouse * model_data_raw$room.Diff
+model_data_raw$itr_single <- model_data_raw$single * model_data_raw$room.Diff
+
+fieldNames <- c("beds", "sold.dat", "baths", "square.feet", "lot.size", "house.age", "single", "townhouse", "room.Diff", "dist.duke", "itr_townhouse", "itr_single", "log.price")
+                
+
+
+model_data_raw <- model_data_raw[fieldNames]
+# model_data_raw <- scale(model_data_raw)
+
+
+win_size <- 5
+begin <- min(model_data_raw$sold.dat)
+end <- max(model_data_raw$sold.dat)
+windowGrid <- seq(begin, end, win_size)
+
+
+
+win_X <- list()
+win_Y <- list()
+win_mid_date <- c()
+
+
+for(i in 1:(length(windowGrid)-1) )
+{
+  win_start= windowGrid[i]
+  win_end  = windowGrid[i+1]
+  win_data = filter(model_data_raw, sold.dat >= win_start)
+  win_data = filter(win_data, sold.dat <  win_end)
+
+  win_X[[i]] <- data.matrix(win_data[, -which(names(win_data) == "log.price")])
+  win_Y[[i]] <- data.matrix(win_data$log.price)
+  mid_date <- win_start + floor((win_start - win_end )/2)
+  win_mid_date[i] <- mid_date
+}
+
+n <- length(win_X)
+pred_step <- 12
+
+train_win_X <- win_X[c(1:(n-pred_step))]
+train_win_Y <- win_Y[c(1:(n-pred_step))]
+train_win_mid_date <- win_mid_date[c(1:(n-pred_step))]
+test_win_X <- win_X[c((n-pred_step+1):n)]
+test_win_Y <- win_Y[c((n-pred_step+1):n)]
+train_win_mid_date <- win_mid_date[c((n-pred_step+1):n)]
+
+
+n_train <- length(train_win_X)
+n_test <- length(test_win_X)
+print(n_train)
+print(n_test)
+
+
+```
+
+```{r}
+set.seed(1234)
+
+p <- 7
+q <- dim(train_win_X[[1]])[2]
+kappa <- 0.1
+
+####################
+### Dynamic Init ###
+####################
+
+# Prior for balpha_0: Normal(m_0, C_0)
+m_0 <- rep(30000, p)
+C_0 <- diag(p)*0.01
+balpha_0 <- mvrnorm(n = 1, m_0, C_0)
+
+##########################
+### Dynamic Model Init ###
+##########################
+
+# Prior for phi (w^{-1}) : Gamma(a_0, b_0)
+a_0 <- 1/2
+b_0 <- 1/2
+phi <- rgamma(1, shape = a_0, rate = b_0)
+w <- 1/phi
+
+# Prior for btheta_{1:p}: Normal(theta_mu_0, theta_Sigma_0)
+theta_mu_0 <- rep(0, p)
+theta_Sigma_0 <- diag(p) 
+btheta <- as.matrix(mvrnorm(n = 1, theta_mu_0, theta_Sigma_0/phi))
+
+##############################
+### Observation Model Init ###
+##############################
+
+# Random initialize for tau (v): no density
+tau <- 1
+v <- 1/tau
+
+# Prior for beta_{1:q}: Normal(beta_mu_0, beta_Sigma_0)
+beta_mu_0 <- rep(0, q)
+beta_Sigma_0 <- diag(q) * ( kappa^-1) * (tau^-1)
+bbeta <- as.matrix(mvrnorm(1, beta_mu_0, beta_Sigma_0))
+
+
+######################
+### Container Init ###
+######################
+      
+m <- list()
+C <- list()
+a <- list()
+R <- list()
+ms <- list()
+Cs <- list()
+balphas <- list()
+alphas <- c()
+
+```
+
+```{r MCMC Start}
+# REMOVE THIS FOR LATER FUNCTION
+total_itr = 1
+
+record_alphas <- NULL
+record_thetas <- NULL
+record_betas <- NULL
+record_ws <- NULL
+record_vs <- NULL
+
+####################
+#### MCMC Start ####
+# ####################
+for(i in 1:total_itr)
+{
+  # Make \bTHETA
+  jordan_mtx <- cbind(diag(p-1), rep(0, p-1))
+  bTHETA <- rbind(t(btheta), jordan_mtx)
+  
+  #############################
+  ##### Forward Filtering #####
+  #############################
+  
+  for(i in 1:n_train)
+  {
+    n_i <- dim(train_win_X[[i]])[1]
+    # Make \bm{1}
+    bm_1_row <- cbind(c(1), t(rep(0, p-1)))
+    bm_1 <- matrix(rep( t(bm_1_row), n_i), nrow=n_i, byrow=TRUE)
+    if(i==1)
+    {
+    a_i <- bTHETA %*% m_0
+    R_i <- bTHETA %*% C_0 %*% t(bTHETA)+ w*diag(p)
+    m_i <- solve(solve(R_i) + (1/v) * t(bm_1) %*% bm_1)  %*% 
+      (solve(R_i)%*%a_i + 1/v * t(bm_1) %*%(train_win_Y[[i]] - train_win_X[[i]]%*%bbeta) )
+    C_i <- solve(solve(R_i) + (1/v) * t(bm_1) %*% bm_1)
+    a[[i]] <- a_i
+    R[[i]] <- R_i
+    m[[i]] <- m_i
+    C[[i]] <- C_i
+    }
+    else{
+    a_i <- bTHETA %*% m[[i-1]]
+    R_i <- bTHETA %*% C[[i-1]] %*% t(bTHETA)+ w*diag(p)
+    m_i <- solve(solve(R_i) + (1/v) * t(bm_1) %*% bm_1)  %*% 
+      (solve(R_i)%*%a_i + 1/v * t(bm_1) %*%(train_win_Y[[i]] - train_win_X[[i]] %*% as.matrix(bbeta)) )
+    C_i <- solve(solve(R_i) + (1/v) * t(bm_1) %*% bm_1)
+    m[[i]] <- m_i
+    C[[i]] <- C_i
+    a[[i]] <- a_i
+    R[[i]] <- R_i
+    }
+  }
+  
+  
+  
+  #############################
+  ##### Backward Sampling #####
+  #############################
+  
+  # n_train = T  
+  ms[[n_train]] = m[[n_train]]
+  Cs[[n_train]] = C[[n_train]]
+  balpha_T <- mvrnorm(n = 1, m_0, C_0)
+  balphas[[n_train]] = balpha_T
+  alphas[n_train] = balpha_T[1]
+  for(i in (n_train-1):1)
+  {
+    # RTS smoother mean and variance
+    J_i <- C[[i]] %*% t(bTHETA) %*% solve(R[[i+1]])
+    ms_i <- m[[i]] + J_i %*% (ms[[i+1]] - bTHETA %*% m[[i]])
+    Cs_i <- C[[i]] + J_i %*% (Cs[[i+1]] - R[[i+1]]) %*% t(J_i)
+    
+    # Backward sample Conditional balpha_t
+    cond_ms_i <- m[[i]] + J_i %*% (balphas[[i+1]] - bTHETA %*% m[[i]])
+    cond_Cs_i <- C[[i]] + J_i %*% R[[i+1]] %*% t(J_i)
+    balpha_i <-  mvrnorm(n = 1, cond_ms_i, cond_Cs_i)
+    
+    # Record smoothed mean and variance
+    ms[[i]] <- ms_i
+    Cs[[i]] <- Cs_i
+    
+    # Record backward samples
+    balphas[[i]] <- balpha_i
+    alphas[i] <- balpha_i[1]   
+  }
+  
+  # Deal with t=0 problem
+  # RTS smoother mean and variance
+  J_0 <- C_0 %*% t(bTHETA) %*% solve(R[[1]])
+  ms_0 <- m_0 + J_0 %*% (ms[[1]] - bTHETA %*% m_0)
+  Cs_0 <- C_0 + J_0 %*% (Cs[[1]] - R[[1]]) %*% t(J_0)
+  
+  # Backward sample Conditional balpha_t
+  cond_ms_0 <- m_0 + J_0 %*% (balphas[[1]] - bTHETA %*% m_0)
+  cond_Cs_0 <- C_0 + J_0 %*% R[[1]] %*% t(J_0)
+  balpha_0 <-  mvrnorm(n = 1, cond_ms_0, cond_Cs_0)  
+  
+
+  ##################################
+  ##### Dynamic Model Sampling #####
+  ##################################
+  
+  Dyn_y <- as.matrix(alphas)
+  Dyn_X <- t(cbind(balpha_0, t(do.call(rbind, balphas[c(1:n_train-1)]))) )
+  
+  
+  theta_mu_n <- solve( t(Dyn_X) %*% Dyn_X + solve(theta_Sigma_0) ) %*% 
+                (solve(theta_Sigma_0) %*% theta_mu_0 + t(Dyn_X) %*% Dyn_y)
+  theta_Sigma_n <- solve(t(Dyn_X) %*% Dyn_X + solve(theta_Sigma_0))
+  
+  a_n <- a_0 + n_train/2
+  b_n <- b_0 + 1/2 * (  t(Dyn_y) %*% Dyn_y + 
+                        t(theta_mu_0) %*% solve(theta_Sigma_0) %*% theta_mu_0 -
+                        t(theta_mu_n) %*% solve(theta_Sigma_n) %*% theta_mu_n )
+  
+  # Sample and update w = phi^{-1}
+  phi <- rgamma(1, shape = a_n, rate = b_n )
+  w <- 1 / phi
+  # Sample and update btheta
+  btheta <- mvrnorm(n=1, theta_mu_n, solve(theta_Sigma_n)/phi )
+  
+  
+  ######################################
+  ##### Observation Model Sampling #####
+  ######################################
+  
+  # Make z_t
+  
+  train_win_Z <- lapply(c(1:n_train), function(idx) train_win_Y[[idx]] - alphas[idx])
+  
+  Obs_Z <- do.call(rbind, train_win_Z)
+  Obs_X <- do.call(rbind, train_win_X)
+  
+  N <- dim(Obs_Z)[1]
+  
+  # Sample and update tau = v^{-1}
+  tau <- rgamma(1, (N+q)/2, kappa/2 * t(bbeta) %*% bbeta)
+  v <- 1/tau
+  
+  # Calculate posterior for beta | tau
+  beta_mu_n <- solve( t(Obs_X) %*% Obs_X + kappa * diag(q)) %*% t(Obs_X) %*% Obs_Z 
+  beta_Sigma_n <- 1/tau * solve( t(Obs_X) %*% Obs_X + kappa * diag(q))
+  
+  # Sample and update bbeta
+  bbeta <- mvrnorm(1, beta_mu_n, beta_Sigma_n)
+
+  ##################################
+  ##### record MCMC trajectory #####
+  ##################################
+
+  record_alphas <- rbind(record_alphas, alphas)
+  record_thetas <- rbind(record_thetas, btheta)
+  record_betas <- rbind(record_betas, bbeta)
+  record_ws <- rbind(record_ws, w)
+  record_vs <- rbind(record_vs, v)
+}
+```
+
+
+```{r Try JAGS}
+model <- function(){
+  for(t in 1:n_train){
+    train_win_Y[[t]] ~ dmnorm( balpha[[t]][1] + train_win_X %*% bbeta, 1/v * diag(n_t) )
+    balpha[[t]] ~ dmnorm( bTHETA %*% balpha[[t]], 1/v * diag(p) )
+  }
+  bbeta ~ dmnorm( rep(0, q),  v*kappa*diag(q) )
+  v ~ dgamma(1/2, 1/2)
+  
+  
+}
+```
+
+
+
+```{r}
+pkg_test("matrixStats")
+
+colQuantiles(record_alphas, probs = c(0.025, 0.975))
+record_alphas[1000,]
+colMeans(record_betas)
+colMeans(record_alphas)
+colMeans(record_thetas)
+mean(record_ws)
+mean(record_vs)
+
+plot(record_alphas[1000,])
+
+dim(record_alphas)
+toplot_alphas <- as.data.frame(t(record_alphas), row.names = seq(n_train))
+toplot_alphas$index <- seq(n_train)
+head(toplot_alphas)
+
+ggplot(toplot_alphas,aes(x=index,y=alphas)) + geom_line()
+```
 
 
 
 \newpage
 
-\section*{Appendix}
+<!-------------------------------------------REFERENCE--------------------------------------------->
+<!-------------------------------------------REFERENCE--------------------------------------------->
+<!-------------------------------------------REFERENCE--------------------------------------------->
 
 
-
-
-<!-- \begin{figure}[H] -->
-<!--     \centering -->
-<!--     \includegraphics[width=\linewidth]{3bed.jpg} -->
-<!--     \caption{3 bed Stationarity} -->
-<!-- \end{figure} -->
-
-<!-- \begin{figure}[H] -->
-<!--     \centering -->
-<!--     \includegraphics[width=\linewidth]{4bed.jpg} -->
-<!--     \caption{4 bed Stationarity} -->
-<!-- \end{figure} -->
-
-<!-- \begin{figure}[H] -->
-<!--     \centering -->
-<!--     \includegraphics[width=\linewidth]{5bed.jpg} -->
-<!--     \caption{5 bed Stationarity} -->
-<!-- \end{figure} -->
-
-<!-- \begin{figure}[H] -->
-<!--     \centering -->
-<!--     \includegraphics[width=0.6\linewidth]{PropertyType.jpg} -->
-<!--     \caption{5 bed Stationarity} -->
-<!-- \end{figure} -->
-
-<!-- \begin{figure}[H] -->
-<!--     \centering -->
-<!--     \includegraphics[width=0.6\linewidth]{City.jpg} -->
-<!--     \caption{5 bed Stationarity} -->
-<!-- \end{figure} -->
-
-
-<!-- \begin{figure}[!htb] -->
-<!--     \centering -->
-<!--     \includegraphics[width=\linewidth]{BIG.jpg} -->
-<!--     \caption{Pair plot of all variables} -->
-<!-- \end{figure} -->
-
-
-    
-
-
-{\sc Last Revised: September 13, 2020}
-
-Some reference
+\section*{Bibliography}
 
 \href{ https://www.dallasfed.org/-/media/documents/institute/wpapers/2014/0208.pdf }{[1]} https://www.dallasfed.org/-/media/documents/institute/wpapers/2014/0208.pdf
 
@@ -473,3 +844,161 @@ https://medium.com/@feraguilari/time-series-analysis-modfinalproyect-b9fb23c2830
 
 \href{ https://www.redfin.com/ }{[5]}.
 https://www.redfin.com/
+
+
+\newpage
+
+<!-------------------------------------------APPENDIX--------------------------------------------->
+<!-------------------------------------------APPENDIX--------------------------------------------->
+<!-------------------------------------------APPENDIX--------------------------------------------->
+
+\appendix
+
+\section*{Appendix}
+
+\subsection{Parameter Inference}
+
+\subsubsection{Forward Filtering}
+
+\begin{align*}
+    \balfa_t &= \bTheta\balfa_{t-1} + \bm{W}_t\\
+    \bm{y}_{t} &= \bm{1} \balfa_t + \bbeta \bX_t + \bnu_t\\
+    \bm{W}_t &\sim \cN(\bm{0} , w\bm{I})\\
+    \bnu_t &\sim \cN(\bm{0}, v\bm{I}) \\
+    \bm{1} &:= 
+    \begin{bmatrix}
+    1& 0& 0& 0& 0\\
+    1& 0& 0& 0& 0\\
+    1& 0& 0& 0& 0\\
+    \vdots& \vdots& \vdots& \vdots& \vdots\\
+    1& 0& 0& 0& 0\\
+    \end{bmatrix}
+\end{align*}
+
+First, denote that 
+
+
+\begin{align*}
+    \balpha_t | \cD_t, - &\sim \cN(m_t, C_t)\\
+    \balpha_{t+1} | \cD_t, - &\sim \cN(a_{t+1}, R_{t+1})\\\\
+    \balpha_t | \cD_{t-1}, - &\sim \cN(\bTheta m_{t-1}, \bTheta C_{t-1}\bTheta^T + w\bm{I}) = \cN(a_t, R_t)\\
+    \bm{y}_t | \balpha_t, \cD_{t-1}, - &\sim \cN(\bm{1}\balpha_t + \bX_t \bbeta, v\bm{I})\\
+    \bP(\balpha_t | \cD_t) &\propto \bP(\balpha_t | \cD_{t-1}, -)\bP(\bm{y}_t | \balpha_t, \cD_{t-1}, -)\\
+    &\propto \exp\left\{-\frac{1}{2}\left[ \balpha_t^T(R_t^{-1} + v^{-1}\bm{1}^T\bm{1})\balpha - 2\balpha_t^T(R_t^{-1}a_t + v^{-1}\bm{1}^T(\bm{y}_t - \bX_t\bbeta)) \right] \right\}\\
+    &\sim \cN\left(\left( R_t^{-1}+v^{-1}\bm{1}^T\bm{1}\right)^{-1}(R_t^{-1}a_t + v^{-1}\bm{1}^T(\bm{y}_t - \bX_t\bbeta)) ,\left( R_t^{-1}+v^{-1}\bm{1}^T\bm{1}\right)^{-1}\right)\\
+    &= \cN(m_t, C_t)\\\\
+    a_t &= \bTheta m_{t-1}\\
+    R_t &= \bThetaC_{t-1}\bTheta^T + w\bm{I}\\
+    m_t &= \left( R_t^{-1}+v^{-1}\bm{1}^T\bm{1}\right)^{-1}(R_t^{-1}a_t + v^{-1}\bm{1}^T(\bm{y}_t - \bX_t\bbeta))\\
+    C_t &= \left( R_t^{-1}+v^{-1}\bm{1}^T\bm{1}\right)^{-1}
+\end{align*}
+
+
+Use this equation to update
+
+\subsubsection{Backward Smoothing}
+\tiny
+Sh*t, I hate this...
+\bigbreak
+\normalsize
+Suppose we already know that 
+
+$$\bP(\balpha_{t+1} | \cD_T ) \sim \cN(m_{t+1}^*, R_{t+1}^*) $$
+
+
+Let's look at log likelihood of $\balpha_t, \balpha_{t+1} | \cD_T$. Using conditional independence, we have
+
+
+\begin{align*}
+    -\frac{1}{2}\ell(\balpha_t, \balpha_{t+1} ; \cD_T) &= \log \bP\left(\balpha_{t+1} \mid \balpha_{t}\right)+\log \bP\left(\balpha_{t} \mid \cD_t\right)-\log \bP\left(\balpha_{t+1} \mid \cD_t \right)+\log \bP\left(\balpha_{t+1} \mid \cD_T\right)\\
+    &= (w)^{-1}(\balpha_{t+1} - \bTheta\balpha_{t})^T(\balpha_{t+1} - \bTheta\balpha_{t}) + (\balpha_t - m_t)^T(C_t)^{-1}(\balpha_t - m_t) -\\
+    &\quad (\balpha_{t+1} - a_{t+1})^T(R_{t+1})^{-1}(\balpha_{t+1} - a_{t+1}) + \\
+    &\quad (\balpha_{t+1} -m_{t+1}^*)^T(C_{t+1}^*)^{-1}(\balpha_{t+1} -m_{t+1}^*) + \text{constant}\\
+    &= \balpha_{t+1}^T({C_{t+1}^*}^{-1} + w^{-1}\bm{I} + R_{t+1}^{-1}) \balpha_{t+1} + \balpha_{t}^T(w^{-1}\bTheta^T\bTheta+C_t^{-1}) \balpha_t +\\
+    &\quad 2\balpha_{t+1}^T(-w^{-1}\bTheta)\balpha_{t} - 2\balpha_t^T(C_t^{-1}m_t) - 2\balpha_{t+1}^T(R_{t+1}^{-1}a_{t+1} + {C_{t+1}^*}^{-1}m_{t+1}^*)+  \text{constant}
+\end{align*}
+
+One eternity of calculation later, we end up with:
+\begin{align*}
+    J_t &= C_t\bTheta^T(\bTheta C_t \bTheta^T + w\bm{I})^{-1}\\
+    m_{t}^* &= m_{t} + J_t(m_{t+1}^* - \bTheta m_t)\\
+    C_{t}^* &= C_t + J_t(C_{t+1}^* - \bTheta C_t \bTheta^T - w\bm{I})J_t^T
+\end{align*}
+
+And therefore
+$$
+\balpha_{t} | \balpha_{t+1}, \cD_T \sim \cN\Big(m_{t} + J_{t}(      \balpha_{t+1}  - \bTheta m_{t} ), C_{t} - J_{t}R_{t+1}J_{t}^\top\Big)
+$$
+
+\subsubsection{Dynamic model sampling: $(\theta_1, \cdots, \theta_7)^\top$, $w = \phi^{-1}$}
+
+This is a simple linear regression $\bm{\alpha} = \mathbf{X}\btheta + w_t$ with design matrices as
+
+\begin{align*}
+    \bm{y} =
+    \begin{bmatrix}
+    \alpha_1\\
+    \alpha_2\\
+    \alpha_3\\
+    \alpha_4\\
+    \alpha_5\\
+    \vdots\\
+    \alpha_T
+    \end{bmatrix} \quad \quad
+    \mathbf{X} &= 
+    \begin{bmatrix}
+    \alpha_{1-1}& \hdots & \alpha_{1-7}\\
+    \alpha_{2-1}& \hdots & \alpha_{2-7}\\
+    \alpha_{3-1}& \hdots & \alpha_{3-7}\\
+    \alpha_{4-1}& \hdots & \alpha_{4-7}\\
+    \alpha_{5-1}& \hdots & \alpha_{5-7}\\
+    \vdots      & \vdots & \vdots \\
+    \alpha_{T-1}& \hdots & \alpha_{T-7}\\
+    \end{bmatrix} \quad \quad 
+    \btheta = 
+    \begin{bmatrix}
+    \theta_1\\
+    \theta_2\\
+    \theta_3\\
+    \theta_4\\
+    \theta_5\\
+    \theta_6\\
+    \theta_7\\
+    \end{bmatrix}
+\end{align*}
+
+\begin{align*}
+    \mathcal{L}(\bm{y} ; \btheta, \mathbf{X}) &\propto \phi^{\frac{T}{2}} \exp\{-\frac{1}{2}\phi ( \bm{y} - \mathbf{X}\btheta)^{\T} ( \bm{y} - \mathbf{X}\btheta)\} \\
+    \btheta | \phi, \cD_T, \bbeta, v &\sim \mathcal{N}\left(\boldsymbol{\mu}_{0}, \boldsymbol{\Lambda}_{0}^{-1} / \phi\right) = \cN((0.5, 0.5, 0.5)^T, 1/3 \phi^{-1}\mathbf{I})\\
+    \phi | \cD_T, \bbeta, v &\sim \mathbf{G}\left(a_0 = \frac{v_{0}}{2}, b_0 = \frac{v_0 s_0^2}{2}  \right) = \mathbf{G}\left(\frac{1}{2}, \frac{1}{2} \right)\\
+    \boldsymbol{\mu}_{n} &= \left(\mathbf{X}^{\mathrm{T}}\mathbf{X}+\boldsymbol{\Lambda}_{0}\right)^{-1}\left(\boldsymbol{\Lambda}_{0} \boldsymbol{\mu}_{0}+\mathbf{X}^{\mathrm{T}} \boldsymbol{\bm{y}}\right) \\
+    \boldsymbol{\Lambda}_{n}  &= \left(\mathbf{X}^{\mathrm{T}}\mathbf{X}+\mathbf{\Lambda}_{0}\right)   \\
+    a_n &= a_0 + \frac{T}{2}\\
+    b_n &= b_0 + \frac{1}{2}(\bm{y}^{\T}\bm{y} + \boldsymbol{\mu}_0^{\T}\boldsymbol{\Lambda}_0\boldsymbol{\mu}_0 - \boldsymbol{\mu}_n^{\T}\boldsymbol{\Lambda}_n\boldsymbol{\mu}_n) \\
+    \btheta | \phi, \bX, \cD_T, \bbeta, v &\sim \mathcal{N}\left(\boldsymbol{\mu}_{n}, \boldsymbol{\Lambda}_{n}^{-1} / \phi\right)\\
+    \phi | \bX, \cD_T, \bbeta, v &\sim \mathbf{G}\left(a_n, b_n \right)\\
+\end{align*}
+
+\subsubsection{Observation Model Sampling $(\beta_1 \cdots )^\top$, $v =\tau^{-1}$}
+
+Very similar as above, this is also a linear model. Besides, it is possible to apply Bayesian Ridge here. let's create the Bayesian ridge model
+
+
+\begin{align*}
+    \bm{y}_t &= \bm{\alpha}_t\bm{1} + \bm{X} \bbeta + \nu_t\\
+    \bm{z}_t = (\bm{y}_t-\bm{\alpha}_t\bm{1}) \mid \bm{\alpha}_t, \boldsymbol{\beta}, \tau &\sim \mathrm{N}\left(\mathbf{X} \boldsymbol{\beta}, \mathbf{l}_{n} / \tau\right) \\
+    \boldsymbol{\beta} \mid \tau, \kappa & \sim \mathrm{N}\left(\mathbf{0}, \mathbf{l}(\tau \kappa)^{-1}\right) \\
+    p(\tau \mid \kappa) & \propto 1 / \tau \\\\
+    \bP(\bm{y}_t-\bm{\alpha}_t\bm{1} | \bX, \bbeta, \tau, \bm{\alpha}) &\propto \tau^{\frac{n}{2}}\exp\{-\frac{\tau}{2}(\bm{z}_t - \bX\bbeta)^T(\bm{z}_t - \bX\bbeta)\}\\
+    \bP( \bbeta | \bX, \bm{z}_t, \tau, \bm{\alpha}) &\propto \bP(\bm{z}_t | \bX, \bbeta, \tau, \bm{\alpha})\bP(\bbeta | \tau, \kappa, \bm{\alpha})\bP(\tau | \kappa, \bm{\alpha})\\
+    &\propto \tau^{\frac{n}{2}}\exp\{-\frac{\tau}{2}(\bm{z}_t - \bX\bbeta)^T(\bm{z}_t - \bX\bbeta)\} (\tau \kappa)^{\frac{p}{2}} \exp\left\{ -\frac{\tau \kappa}{2}\bbeta^T\bbeta\right\}\tau^{-1}\\
+    &\propto \exp \left\{ -\frac{1}{2}\left[ \bbeta^T(\tau \bX^T\bX+ \tau\kappa\bm{1} )\bbeta - 2\tau\bbeta^T\bX^T\bm{z}_t  \right]\right\}\\
+    &\sim N\left( (\bX^T\bX + \kappa \bm{1}_p)^{-1} \bX^T\bm{z}_t, \tau^{-1}(\bX^T\bX + \kappa \bm{1}_p)^{-1}\right)\\
+    \bbeta | \bX, \bm{z}_t, \tau , \bm{\alpha}&= \cN(\bm{\mu}, \bm{\Sigma})\\
+    \bP(\tau | \bbeta, \kappa, \bm{z}_t, \bm{\alpha}) &\propto \tau^{\frac{n+p}{2}-1}\exp\left\{ -\frac{\tau \kappa}{2}\bbeta^T\bbeta\right\}\\
+    \tau | \bbeta, \kappa, \bm{z}_t, \bm{\alpha} &\sim \bm{G}(\frac{n+p}{2}, \frac{\kappa}{2}\bbeta^T\bbeta)
+\end{align*}
+
+
+{\sc Last Revised: September 13, 2020}
+
