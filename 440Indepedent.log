@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.10.13)  13 OCT 2020 00:26
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.10.18)  18 OCT 2020 23:20
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -562,27 +562,135 @@ Package: relsize 2013/03/29 ver 4.1
 \c@algocf=\count298
 \algocf@algoframe=\box66
 \algocf@algobox=\box67
+) (/home/guest/.TinyTeX/texmf-dist/tex/latex/booktabs/booktabs.sty
+Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
+\heavyrulewidth=\dimen190
+\lightrulewidth=\dimen191
+\cmidrulewidth=\dimen192
+\belowrulesep=\dimen193
+\belowbottomsep=\dimen194
+\aboverulesep=\dimen195
+\abovetopsep=\dimen196
+\cmidrulesep=\dimen197
+\cmidrulekern=\dimen198
+\defaultaddspace=\dimen199
+\@cmidla=\count299
+\@cmidlb=\count300
+\@aboverulesep=\dimen256
+\@belowrulesep=\dimen257
+\@thisruleclass=\count301
+\@lastruleclass=\count302
+\@thisrulewidth=\dimen258
+) (/home/guest/.TinyTeX/texmf-dist/tex/latex/tools/longtable.sty
+Package: longtable 2020/01/07 v4.13 Multi-page Table package (DPC)
+\LTleft=\skip84
+\LTright=\skip85
+\LTpre=\skip86
+\LTpost=\skip87
+\LTchunksize=\count303
+\LTcapwidth=\dimen259
+\LT@head=\box68
+\LT@firsthead=\box69
+\LT@foot=\box70
+\LT@lastfoot=\box71
+\LT@cols=\count304
+\LT@rows=\count305
+\c@LT@tables=\count306
+\c@LT@chunks=\count307
+\LT@p@ftn=\toks32
+) (/home/guest/.TinyTeX/texmf-dist/tex/latex/multirow/multirow.sty
+Package: multirow 2019/05/31 v2.5 Span multiple rows of a table
+\multirow@colwidth=\skip88
+\multirow@cntb=\count308
+\multirow@dima=\skip89
+\bigstrutjot=\dimen260
+) (/home/guest/.TinyTeX/texmf-dist/tex/latex/colortbl/colortbl.sty
+Package: colortbl 2020/01/04 v1.0e Color table columns (DPC)
+\everycr=\toks33
+\minrowclearance=\skip90
+) (/home/guest/.TinyTeX/texmf-dist/tex/latex/pdflscape/pdflscape.sty
+Package: pdflscape 2019/12/05 v0.12 Display of landscape pages in PDF (HO)
+Package pdflscape Info: Auto-detected driver: pdftex on input line 81.
+) (/home/guest/.TinyTeX/texmf-dist/tex/latex/tabu/tabu.sty
+Package: tabu 2019/01/11 v2.9 - flexible LaTeX tabulars (FC+tabu-fixed)
+(/home/guest/.TinyTeX/texmf-dist/tex/latex/varwidth/varwidth.sty
+Package: varwidth 2009/03/30 ver 0.92;  Variable-width minipages
+\@vwid@box=\box72
+\sift@deathcycles=\count309
+\@vwid@loff=\dimen261
+\@vwid@roff=\dimen262
+)
+\c@taburow=\count310
+\tabu@nbcols=\count311
+\tabu@cnt=\count312
+\tabu@Xcol=\count313
+\tabu@alloc=\count314
+\tabu@nested=\count315
+\tabu@target=\dimen263
+\tabu@spreadtarget=\dimen264
+\tabu@naturalX=\dimen265
+\tabucolX=\dimen266
+\tabu@Xsum=\dimen267
+\extrarowdepth=\dimen268
+\abovetabulinesep=\dimen269
+\belowtabulinesep=\dimen270
+\tabustrutrule=\dimen271
+\tabu@thebody=\toks34
+\tabu@footnotes=\toks35
+\tabu@box=\box73
+\tabu@arstrutbox=\box74
+\tabu@hleads=\box75
+\tabu@vleads=\box76
+\tabu@cellskip=\skip91
+) (/home/guest/.TinyTeX/texmf-dist/tex/latex/threeparttable/threeparttable.sty
+Package: threeparttable 2003/06/13  v 3.0
+\@tempboxb=\box77
+) (/home/guest/.TinyTeX/texmf-dist/tex/latex/threeparttablex/threeparttablex.st
+y
+Package: threeparttablex 2013/07/23 v0.3 by daleif
+(/home/guest/.TinyTeX/texmf-dist/tex/latex/environ/environ.sty
+Package: environ 2014/05/04 v0.3 A new way to define environments
+(/home/guest/.TinyTeX/texmf-dist/tex/latex/trimspaces/trimspaces.sty
+Package: trimspaces 2009/09/17 v1.1 Trim spaces around a token list
+))
+\TPTL@width=\skip92
+) (/home/guest/.TinyTeX/texmf-dist/tex/generic/ulem/ulem.sty
+\UL@box=\box78
+\UL@hyphenbox=\box79
+\UL@skip=\skip93
+\UL@hook=\toks36
+\UL@height=\dimen272
+\UL@pe=\count316
+\UL@pixel=\dimen273
+\ULC@box=\box80
+Package: ulem 2019/11/18
+\ULdepth=\dimen274
+) (/home/guest/.TinyTeX/texmf-dist/tex/latex/makecell/makecell.sty
+Package: makecell 2009/08/03 V0.1e Managing of Tab Column Heads and Cells
+\rotheadsize=\dimen275
+\c@nlinenum=\count317
+\TeXr@lab=\toks37
 ) (./440Indepedent.aux)
 \openout1 = `440Indepedent.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 87.
-LaTeX Font Info:    ... okay on input line 87.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 87.
-LaTeX Font Info:    ... okay on input line 87.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 87.
-LaTeX Font Info:    ... okay on input line 87.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 87.
-LaTeX Font Info:    ... okay on input line 87.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 87.
-LaTeX Font Info:    ... okay on input line 87.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 87.
-LaTeX Font Info:    ... okay on input line 87.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 87.
-LaTeX Font Info:    ... okay on input line 87.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 87.
-LaTeX Font Info:    ... okay on input line 87.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 87.
-LaTeX Font Info:    ... okay on input line 87.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 100.
+LaTeX Font Info:    ... okay on input line 100.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 100.
+LaTeX Font Info:    ... okay on input line 100.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 100.
+LaTeX Font Info:    ... okay on input line 100.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 100.
+LaTeX Font Info:    ... okay on input line 100.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 100.
+LaTeX Font Info:    ... okay on input line 100.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 100.
+LaTeX Font Info:    ... okay on input line 100.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 100.
+LaTeX Font Info:    ... okay on input line 100.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 100.
+LaTeX Font Info:    ... okay on input line 100.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 100.
+LaTeX Font Info:    ... okay on input line 100.
 (/home/guest/.TinyTeX/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
 Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
@@ -591,7 +699,7 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-Package hyperref Info: Link coloring OFF on input line 87.
+Package hyperref Info: Link coloring OFF on input line 100.
 (/home/guest/.TinyTeX/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2019/09/16 v2.46 Cross-referencing by name of section
 (/home/guest/.TinyTeX/texmf-dist/tex/latex/refcount/refcount.sty
@@ -600,11 +708,11 @@ Package: refcount 2019/12/15 v3.6 Data extraction from label references (HO)
 y
 Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 )
-\c@section@level=\count299
+\c@section@level=\count318
 )
-LaTeX Info: Redefining \ref on input line 87.
-LaTeX Info: Redefining \pageref on input line 87.
-LaTeX Info: Redefining \nameref on input line 87.
+LaTeX Info: Redefining \ref on input line 100.
+LaTeX Info: Redefining \pageref on input line 100.
+LaTeX Info: Redefining \nameref on input line 100.
 (./440Indepedent.out) (./440Indepedent.out)
 \@outlinefile=\write3
 \openout3 = `440Indepedent.out'.
@@ -645,40 +753,45 @@ LaTeX Info: Redefining \nameref on input line 87.
 
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: float package is loaded.
+Package caption Info: longtable package is loaded.
+(/home/guest/.TinyTeX/texmf-dist/tex/latex/caption/ltcaption.sty
+Package: ltcaption 2020/05/30 v1.4b longtable captions (AR)
+)
+Package caption Info: threeparttable package is loaded.
 Package caption Info: wrapfig package is loaded.
 Package caption Info: End \AtBeginDocument code.
-LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 8
-9.
+LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 1
+02.
 (/home/guest/.TinyTeX/texmf-dist/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for OML+lmm on input line 8
-9.
+LaTeX Font Info:    Trying to load font information for OML+lmm on input line 1
+02.
 (/home/guest/.TinyTeX/texmf-dist/tex/latex/lm/omllmm.fd
 File: omllmm.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for U+msa on input line 89.
-
+LaTeX Font Info:    Trying to load font information for U+msa on input line 102
+.
 (/home/guest/.TinyTeX/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 89.
-
+LaTeX Font Info:    Trying to load font information for U+msb on input line 102
+.
 (/home/guest/.TinyTeX/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
 LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 
-89.
+102.
 (/home/guest/.TinyTeX/texmf-dist/tex/latex/lm/omslmsy.fd
 File: omslmsy.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for U+wasy on input line 89
-.
+LaTeX Font Info:    Trying to load font information for U+wasy on input line 10
+2.
 (/home/guest/.TinyTeX/texmf-dist/tex/latex/wasysym/uwasy.fd
 File: uwasy.fd 2020/01/19 v2.4 Wasy-2 symbol font definitions
 )
 LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 1
-82.
+97.
 (/home/guest/.TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
@@ -688,182 +801,249 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 [1
 
 {/home/guest/.TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-<440Indepedent_files/figure-latex/property type count bar plot-1.pdf, id=59, 27
-3.02pt x 135.50626pt>
-File: 440Indepedent_files/figure-latex/property type count bar plot-1.pdf Graph
-ic file (type pdf)
-<use 440Indepedent_files/figure-latex/property type count bar plot-1.pdf>
-Package pdftex.def Info: 440Indepedent_files/figure-latex/property type count b
-ar plot-1.pdf  used on input line 207.
-(pdftex.def)             Requested size: 273.02766pt x 135.51004pt.
-<440Indepedent_files/figure-latex/Heteroskedasticity-1.pdf, id=60, 463.7325pt x
- 313.17pt>
+<440Indepedent_files/figure-latex/Collinearity-1.pdf, id=155, 345.29pt x 171.64
+125pt>
+File: 440Indepedent_files/figure-latex/Collinearity-1.pdf Graphic file (type pd
+f)
+<use 440Indepedent_files/figure-latex/Collinearity-1.pdf>
+Package pdftex.def Info: 440Indepedent_files/figure-latex/Collinearity-1.pdf  u
+sed on input line 232.
+(pdftex.def)             Requested size: 345.28914pt x 171.64081pt.
+[2 <./440Indepedent_files/figure-latex/Collinearity-1.pdf>]
+<440Indepedent_files/figure-latex/Heteroskedasticity-1.pdf, id=175, 568.1225pt 
+x 171.64125pt>
 File: 440Indepedent_files/figure-latex/Heteroskedasticity-1.pdf Graphic file (t
 ype pdf)
 <use 440Indepedent_files/figure-latex/Heteroskedasticity-1.pdf>
 Package pdftex.def Info: 440Indepedent_files/figure-latex/Heteroskedasticity-1.
-pdf  used on input line 239.
-(pdftex.def)             Requested size: 463.73842pt x 313.174pt.
-[2 <./440Indepedent_files/figure-latex/property type count bar plot-1.pdf>]
-<440Indepedent_files/figure-latex/stationarity plot-1.pdf, id=79, 572.1375pt x 
-135.50626pt>
+pdf  used on input line 249.
+(pdftex.def)             Requested size: 469.7731pt x 141.9279pt.
+<440Indepedent_files/figure-latex/stationarity plot-1.pdf, id=176, 572.1375pt x
+ 135.50626pt>
 File: 440Indepedent_files/figure-latex/stationarity plot-1.pdf Graphic file (ty
 pe pdf)
 <use 440Indepedent_files/figure-latex/stationarity plot-1.pdf>
 Package pdftex.def Info: 440Indepedent_files/figure-latex/stationarity plot-1.p
-df  used on input line 254.
+df  used on input line 263.
 (pdftex.def)             Requested size: 469.75816pt x 111.2585pt.
-[3 <./440Indepedent_files/figure-latex/Heteroskedasticity-1.pdf> <./440Indepede
-nt_files/figure-latex/stationarity plot-1.pdf>]
-<440Indepedent_files/figure-latex/Plot PACF-1.pdf, id=100, 417.56pt x 134.5025p
+<440Indepedent_files/figure-latex/Plot PACF-1.pdf, id=177, 417.56pt x 134.5025p
 t>
 File: 440Indepedent_files/figure-latex/Plot PACF-1.pdf Graphic file (type pdf)
 <use 440Indepedent_files/figure-latex/Plot PACF-1.pdf>
 Package pdftex.def Info: 440Indepedent_files/figure-latex/Plot PACF-1.pdf  used
- on input line 273.
+ on input line 288.
 (pdftex.def)             Requested size: 417.56532pt x 134.5042pt.
-<440Indepedent_files/figure-latex/Interaction and bed difference-1.pdf, id=101,
- 423.5825pt x 272.01625pt>
+[3 <./440Indepedent_files/figure-latex/Heteroskedasticity-1.pdf> <./440Indepede
+nt_files/figure-latex/stationarity plot-1.pdf>]
+<440Indepedent_files/figure-latex/Interaction and bed difference-1.pdf, id=200,
+ 568.1225pt x 207.77625pt>
 File: 440Indepedent_files/figure-latex/Interaction and bed difference-1.pdf Gra
 phic file (type pdf)
 <use 440Indepedent_files/figure-latex/Interaction and bed difference-1.pdf>
 Package pdftex.def Info: 440Indepedent_files/figure-latex/Interaction and bed d
-ifference-1.pdf  used on input line 286.
-(pdftex.def)             Requested size: 423.59439pt x 272.02388pt.
-<440Indepedent_files/figure-latex/Distance to Duke-1.pdf, id=102, 284.06125pt x
- 272.01625pt>
-File: 440Indepedent_files/figure-latex/Distance to Duke-1.pdf Graphic file (typ
-e pdf)
-<use 440Indepedent_files/figure-latex/Distance to Duke-1.pdf>
-Package pdftex.def Info: 440Indepedent_files/figure-latex/Distance to Duke-1.pd
-f  used on input line 296.
-(pdftex.def)             Requested size: 284.07353pt x 272.02803pt.
+ifference-1.pdf  used on input line 311.
+(pdftex.def)             Requested size: 469.7731pt x 171.80746pt.
 [4 <./440Indepedent_files/figure-latex/Plot PACF-1.pdf> <./440Indepedent_files/
-figure-latex/Interaction and bed difference-1.pdf>] [5 <./440Indepedent_files/f
-igure-latex/Distance to Duke-1.pdf>] [6] [7] [8] [9]
+figure-latex/Interaction and bed difference-1.pdf>] [5] [6] [7] [8]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 513.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\theta' on input line 513.
+(hyperref)                removing `math shift' on input line 604.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `subscript' on input line 513.
+(hyperref)                removing `\theta' on input line 604.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\cdots' on input line 513.
+(hyperref)                removing `subscript' on input line 604.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\theta' on input line 513.
+(hyperref)                removing `\cdots' on input line 604.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `subscript' on input line 513.
+(hyperref)                removing `\theta' on input line 604.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `superscript' on input line 513.
+(hyperref)                removing `subscript' on input line 604.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\top' on input line 513.
+(hyperref)                removing `superscript' on input line 604.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 513.
+(hyperref)                removing `\top' on input line 604.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 513.
+(hyperref)                removing `math shift' on input line 604.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\phi' on input line 513.
+(hyperref)                removing `math shift' on input line 604.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `superscript' on input line 513.
+(hyperref)                removing `\phi' on input line 604.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 513.
+(hyperref)                removing `superscript' on input line 604.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 604.
 
 
 LaTeX Font Warning: Font shape `U/wasy/b/n' in size <7> not available
-(Font)              Font shape `U/wasy/m/n' tried instead on input line 562.
+(Font)              Font shape `U/wasy/m/n' tried instead on input line 653.
 
 
 LaTeX Font Warning: Font shape `U/wasy/b/n' in size <5> not available
-(Font)              Font shape `U/wasy/m/n' tried instead on input line 562.
+(Font)              Font shape `U/wasy/m/n' tried instead on input line 653.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 564.
+(hyperref)                removing `math shift' on input line 655.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\beta' on input line 564.
+(hyperref)                removing `\beta' on input line 655.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `subscript' on input line 564.
+(hyperref)                removing `subscript' on input line 655.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\cdots' on input line 564.
+(hyperref)                removing `\cdots' on input line 655.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `superscript' on input line 564.
+(hyperref)                removing `superscript' on input line 655.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\top' on input line 564.
+(hyperref)                removing `\top' on input line 655.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 564.
+(hyperref)                removing `math shift' on input line 655.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 564.
+(hyperref)                removing `math shift' on input line 655.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\tau' on input line 564.
+(hyperref)                removing `\tau' on input line 655.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `superscript' on input line 564.
+(hyperref)                removing `superscript' on input line 655.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 564.
+(hyperref)                removing `math shift' on input line 655.
 
-[10] [11] (./440Indepedent.aux)
+[9] [10] [11]
+<440Indepedent_files/figure-latex/unnamed-chunk-2-1.pdf, id=309, 572.1375pt x 2
+80.04625pt>
+File: 440Indepedent_files/figure-latex/unnamed-chunk-2-1.pdf Graphic file (type
+ pdf)
+<use 440Indepedent_files/figure-latex/unnamed-chunk-2-1.pdf>
+Package pdftex.def Info: 440Indepedent_files/figure-latex/unnamed-chunk-2-1.pdf
+  used on input line 836.
+(pdftex.def)             Requested size: 469.75816pt x 229.93423pt.
+[12]
+<440Indepedent_files/figure-latex/MCMC notrend Diagnostic-1.pdf, id=317, 459.71
+75pt x 313.17pt>
+File: 440Indepedent_files/figure-latex/MCMC notrend Diagnostic-1.pdf Graphic fi
+le (type pdf)
+<use 440Indepedent_files/figure-latex/MCMC notrend Diagnostic-1.pdf>
+Package pdftex.def Info: 440Indepedent_files/figure-latex/MCMC notrend Diagnost
+ic-1.pdf  used on input line 857.
+(pdftex.def)             Requested size: 459.7304pt x 313.17877pt.
+<440Indepedent_files/figure-latex/MCMC notrend Diagnostic-2.pdf, id=318, 407.52
+25pt x 221.82875pt>
+File: 440Indepedent_files/figure-latex/MCMC notrend Diagnostic-2.pdf Graphic fi
+le (type pdf)
+<use 440Indepedent_files/figure-latex/MCMC notrend Diagnostic-2.pdf>
+Package pdftex.def Info: 440Indepedent_files/figure-latex/MCMC notrend Diagnost
+ic-2.pdf  used on input line 858.
+(pdftex.def)             Requested size: 407.5215pt x 221.82819pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 857--859
+[]
+ []
+
+[13 <./440Indepedent_files/figure-latex/unnamed-chunk-2-1.pdf>]
+<440Indepedent_files/figure-latex/MCMC notrend Diagnostic with sold dat-1.pdf, 
+id=333, 459.7175pt x 313.17pt>
+File: 440Indepedent_files/figure-latex/MCMC notrend Diagnostic with sold dat-1.
+pdf Graphic file (type pdf)
+<use 440Indepedent_files/figure-latex/MCMC notrend Diagnostic with sold dat-1.p
+df>
+Package pdftex.def Info: 440Indepedent_files/figure-latex/MCMC notrend Diagnost
+ic with sold dat-1.pdf  used on input line 862.
+(pdftex.def)             Requested size: 459.7304pt x 313.17877pt.
+<440Indepedent_files/figure-latex/MCMC notrend Diagnostic with sold dat-2.pdf, 
+id=334, 407.5225pt x 220.825pt>
+File: 440Indepedent_files/figure-latex/MCMC notrend Diagnostic with sold dat-2.
+pdf Graphic file (type pdf)
+<use 440Indepedent_files/figure-latex/MCMC notrend Diagnostic with sold dat-2.p
+df>
+Package pdftex.def Info: 440Indepedent_files/figure-latex/MCMC notrend Diagnost
+ic with sold dat-2.pdf  used on input line 863.
+(pdftex.def)             Requested size: 407.54015pt x 220.83455pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 862--864
+[]
+ []
+
+[14 <./440Indepedent_files/figure-latex/MCMC notrend Diagnostic-1.pdf> <./440In
+depedent_files/figure-latex/MCMC notrend Diagnostic-2.pdf>]
+<440Indepedent_files/figure-latex/unnamed-chunk-4-1.pdf, id=354, 453.695pt x 31
+6.18124pt>
+File: 440Indepedent_files/figure-latex/unnamed-chunk-4-1.pdf Graphic file (type
+ pdf)
+<use 440Indepedent_files/figure-latex/unnamed-chunk-4-1.pdf>
+Package pdftex.def Info: 440Indepedent_files/figure-latex/unnamed-chunk-4-1.pdf
+  used on input line 869.
+(pdftex.def)             Requested size: 453.6939pt x 316.18047pt.
+<440Indepedent_files/figure-latex/unnamed-chunk-5-1.pdf, id=355, 459.7175pt x 3
+16.18124pt>
+File: 440Indepedent_files/figure-latex/unnamed-chunk-5-1.pdf Graphic file (type
+ pdf)
+<use 440Indepedent_files/figure-latex/unnamed-chunk-5-1.pdf>
+Package pdftex.def Info: 440Indepedent_files/figure-latex/unnamed-chunk-5-1.pdf
+  used on input line 877.
+(pdftex.def)             Requested size: 459.74442pt x 316.19975pt.
+[15 <./440Indepedent_files/figure-latex/MCMC notrend Diagnostic with sold dat-1
+.pdf> <./440Indepedent_files/figure-latex/MCMC notrend Diagnostic with sold dat
+-2.pdf>] [16 <./440Indepedent_files/figure-latex/unnamed-chunk-4-1.pdf>] [17 <.
+/440Indepedent_files/figure-latex/unnamed-chunk-5-1.pdf>] (./440Indepedent.aux)
 Package rerunfilecheck Info: File `440Indepedent.out' has not changed.
-(rerunfilecheck)             Checksum: 41CFD82D2F36DBD885D876224F077010;1567.
+(rerunfilecheck)             Checksum: 60105A63959BB3F6547A55C863A727F1;5926.
  ) 
 Here is how much of TeX's memory you used:
- 17117 strings out of 481865
- 260112 string characters out of 5931123
- 553461 words of memory out of 5000000
- 33056 multiletter control sequences out of 15000+600000
- 637997 words of font info for 149 fonts, out of 8000000 for 9000
+ 18583 strings out of 481865
+ 283147 string characters out of 5931123
+ 582716 words of memory out of 5000000
+ 34431 multiletter control sequences out of 15000+600000
+ 638103 words of font info for 150 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 60i,14n,68p,356b,465s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 66i,15n,74p,360b,463s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/home/guest/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/home/guest/.T
 inyTeX/texmf-dist/fonts/enc/dvips/mnsymbol/MnSymbolC.enc}{/home/guest/.TinyTeX/
-texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/home/guest/.TinyTeX/texmf-dist/fonts/
-enc/dvips/mnsymbol/MnSymbolD.enc}{/home/guest/.TinyTeX/texmf-dist/fonts/enc/dvi
-ps/mnsymbol/MnSymbolF.enc}{/home/guest/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/l
-m-mathit.enc}{/home/guest/.TinyTeX/texmf-dist/fonts/enc/dvips/mnsymbol/MnSymbol
-E.enc}{/home/guest/.TinyTeX/texmf-dist/fonts/enc/dvips/mnsymbol/MnSymbolS.enc}<
+texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/home/guest/.TinyTeX/texmf-dist/fo
+nts/enc/dvips/lm/lm-rm.enc}{/home/guest/.TinyTeX/texmf-dist/fonts/enc/dvips/mns
+ymbol/MnSymbolE.enc}{/home/guest/.TinyTeX/texmf-dist/fonts/enc/dvips/mnsymbol/M
+nSymbolS.enc}{/home/guest/.TinyTeX/texmf-dist/fonts/enc/dvips/mnsymbol/MnSymbol
+D.enc}{/home/guest/.TinyTeX/texmf-dist/fonts/enc/dvips/mnsymbol/MnSymbolF.enc}<
 /home/guest/.TinyTeX/texmf-dist/fonts/type1/public/mnsymbol/MnSymbol-Bold7.pfb>
 </home/guest/.TinyTeX/texmf-dist/fonts/type1/public/mnsymbol/MnSymbol10.pfb></h
 ome/guest/.TinyTeX/texmf-dist/fonts/type1/public/mnsymbol/MnSymbol5.pfb></home/
@@ -881,10 +1061,10 @@ s/type1/public/lm/lmr12.pfb></home/guest/.TinyTeX/texmf-dist/fonts/type1/public
 nyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></home/guest/.TinyTeX/texmf-d
 ist/fonts/type1/public/lm/lmtt10.pfb></home/guest/.TinyTeX/texmf-dist/fonts/typ
 e1/public/amsfonts/symbols/msbm10.pfb>
-Output written on 440Indepedent.pdf (11 pages, 1139612 bytes).
+Output written on 440Indepedent.pdf (17 pages, 9330520 bytes).
 PDF statistics:
- 309 PDF objects out of 1000 (max. 8388607)
- 256 compressed objects within 3 object streams
- 41 named destinations out of 1000 (max. 500000)
- 111 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 503 PDF objects out of 1000 (max. 8388607)
+ 424 compressed objects within 5 object streams
+ 73 named destinations out of 1000 (max. 500000)
+ 325 words of extra memory for PDF output out of 10000 (max. 10000000)
 
