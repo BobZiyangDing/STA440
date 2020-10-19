@@ -1,5 +1,5 @@
 MCMC_noBlock <- function(train_win_X, train_win_Y, test_win_X, test_win_Y, p, total_itr=10000, kappa=0.02, remember=1000){
-  num_avg <- 195000
+  num_avg <- 50000
   
   set.seed(1234)
   n_train <- length(train_win_X)

@@ -57,7 +57,7 @@ output:
 \newcommand{\balpha}{\bm{\alpha}}
 
 ```{r load packages, include=F, echo=F}
-library(FedData)
+library(FedData) # Please Install this !!
 pkg_test("dplyr")
 pkg_test("ggplot2")
 pkg_test("TSA")
@@ -74,6 +74,8 @@ pkg_test("matrixStats")
 pkg_test("MLmetrics")
 pkg_test("kableExtra")
 pkg_test("bookdown")
+pkg_test("tinytex")
+#tinytex::install_tinytex() turn this on first time you use it
 
 set.seed(1234)
 source("MCMCscript.R")
@@ -549,11 +551,12 @@ model_data_raw <- model_data_raw[fieldNames]
 
 model_data_raw <- scale(model_data_raw)
 center <- as.data.frame( t(attr(model_data_raw,"scaled:center")) )
-scales <- as.data.frame( t(attr(model_data_raw,"scaled:scale")) )
+scales_notrend <- as.data.frame( t(attr(model_data_raw,"scaled:scale")) )
 model_data_raw <- as.data.frame(model_data_raw)
 model_data_raw$log.price <-  onlyDurham$log.price
 
-date_scaler <- scales$sold.dat
+
+date_scaler <- scales_notrend$sold.dat
 
 win_size <- 15
 scaled_win_size <- win_size / date_scaler
@@ -602,7 +605,7 @@ print(n_test)
 ```
 
 ```{r start-MCMC-notrend, include=F, results='hide'}
-total_itr = 200000  #1000000
+total_itr = 60000  #1000000
 kappa = 0.1
 p = 12
 take <- 1000  #1000
@@ -664,11 +667,11 @@ model_data_raw <- model_data_raw[fieldNames]
 
 model_data_raw <- scale(model_data_raw)
 center <- as.data.frame( t(attr(model_data_raw,"scaled:center")) )
-scales <- as.data.frame( t(attr(model_data_raw,"scaled:scale")) )
+scales_linearTrend <- as.data.frame( t(attr(model_data_raw,"scaled:scale")) )
 model_data_raw <- as.data.frame(model_data_raw)
 model_data_raw$log.price <-  onlyDurham$log.price
 
-date_scaler <- scales$sold.dat
+date_scaler <- scales_linearTrend$sold.dat
 
 win_size <- 15
 scaled_win_size <- win_size / date_scaler
@@ -1037,12 +1040,13 @@ We end up with the model as the following
 \subsubsection{C.1 Answer to question 1}
 
 ```{r beta-estimates, echo=F}
-
 # no trend
 record_betas <- record_betas[, which(names(record_betas) != c("itr"))]
-estimate_betas <- colMeans(record_betas)
+estimate_betas <- colMeans(record_betas) / as.matrix(scales_notrend[,-2])
 estimate_beta_ci <- colQuantiles(as.matrix(record_betas), probs = c(0.025, 0.975) )
-notrend_beta <- data.frame(cbind(estimate_betas, estimate_beta_ci))
+estimate_beta_ci[,1] <- estimate_beta_ci[,1] / as.matrix(scales_notrend[,-2])
+estimate_beta_ci[,2] <- estimate_beta_ci[,2] / as.matrix(scales_notrend[,-2])
+notrend_beta <- data.frame(cbind(t(estimate_betas), estimate_beta_ci))
 names(notrend_beta) <- c("mean","0.025%", "0.975%")
 
 emptyrow <- data.frame(NaN, NaN, NaN)
@@ -1053,9 +1057,11 @@ notrend_beta <- rbind(notrend_beta, emptyrow)
 
 # linear trend
 record_linearTrend_betas <- record_linearTrend_betas[, which(names(record_linearTrend_betas) != c("itr"))]
-estimate_LinearTrend_betas <- colMeans(record_linearTrend_betas)
-estimate_beta_LinearTrend_ci <- colQuantiles(as.matrix(record_linearTrend_betas), probs = c(0.025, 0.975) )
-LinearTrend_beta <- data.frame(cbind(estimate_LinearTrend_betas, estimate_beta_LinearTrend_ci))
+estimate_LinearTrend_betas <- colMeans(record_linearTrend_betas) / as.matrix(scales_linearTrend)
+estimate_beta_LinearTrend_ci <- colQuantiles(as.matrix(record_linearTrend_betas), probs = c(0.025, 0.975) ) 
+estimate_beta_LinearTrend_ci[,1] <- estimate_beta_LinearTrend_ci[,1] / as.matrix(scales_linearTrend) 
+estimate_beta_LinearTrend_ci[,2] <- estimate_beta_LinearTrend_ci[,2] / as.matrix(scales_linearTrend)
+LinearTrend_beta <- data.frame(cbind(t(estimate_LinearTrend_betas), estimate_beta_LinearTrend_ci))
 names(LinearTrend_beta) <- c("mean","0.025%", "0.975%")
 
 beta <- cbind(notrend_beta, LinearTrend_beta)
@@ -1070,16 +1076,27 @@ kbl(beta, booktabs=T, caption = "Estimate for Beta") %>%
 \subsubsection{C.2 Answer to question 2}
 
 ```{r, echo=F}
-table.notrend.periodicity <- kable(periocity_notrend)
-table.linearTrend.periodicity <- kable(periocity_linearTrend)
-periodicity <- as.data.frame(cbind(periocity_notrend, periocity_linearTrend))
-rownames(periodicity) <- seq(nrow(periodicity))
-
-
-kbl(periodicity, booktabs=T, caption = "Periodicity with Moduli (Magnitude)") %>%
-  add_header_above(c("No Trend Model" = 3, "Linear Trend Model" = 3)) %>% 
-  kable_styling(latex_options = "striped") %>%
-  kable_styling(latex_options = "HOLD_position")
+if(nrow(periocity_linearTrend) == nrow(periocity_notrend))
+{
+  table.notrend.periodicity <- kable(periocity_notrend)
+  table.linearTrend.periodicity <- kable(periocity_linearTrend)
+  periodicity <- as.data.frame(cbind(periocity_notrend, periocity_linearTrend))
+  rownames(periodicity) <- seq(nrow(periodicity))
+  
+  
+  kbl(periodicity, booktabs=T, caption = "Periodicity with Moduli (Magnitude)") %>%
+    add_header_above(c("No Trend Model" = 3, "Linear Trend Model" = 3)) %>% 
+    kable_styling(latex_options = "striped") %>%
+    kable_styling(latex_options = "HOLD_position")  
+} else
+{
+  kbl(periocity_notrend, booktabs=T, caption = "No Trend Model Periodicity with Moduli (Magnitude)") %>%
+    kable_styling(latex_options = "striped") %>%
+    kable_styling(latex_options = "HOLD_position")  
+  kbl(periocity_linearTrend, booktabs=T, caption = "Linear Trend Model Periodicity with Moduli (Magnitude)") %>%
+    kable_styling(latex_options = "striped") %>%
+    kable_styling(latex_options = "HOLD_position")  
+}
 ```
 
 \subsubsection{C.3 Answer to question 3}
