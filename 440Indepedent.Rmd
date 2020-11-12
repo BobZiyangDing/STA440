@@ -104,29 +104,29 @@ Being such a sophisticated product, real estate prices are impacted by many fact
 
 Many previous researchers have already proposed multiple ways of predicting and forecasting house prices. From the most simple regression methods as proposed in Kaggle's advanced regression technique blog posts \href{https://www.kaggle.com/manisaurabh/house-prices-advanced-regression-technique }{[2]}, to those that account for repeated sales of houses \href{ https://rady.ucsd.edu/faculty/directory/valkanov/pub/docs/HandRE_GPTV.pdf }{[3]}, and to those that consider temporal effects, such as proposed by Fernando\href{ https://medium.com/@feraguilari/time-series-analysis-modfinalproyect-b9fb23c28309 }{[4]} and Nihar et. al\href{ https://www.ijcaonline.org/archives/volume152/number2/26292-2016911775}{[6]}. Though these studies are drastically different, and research can incorporate more effects to propose more sophisticated models, each study's focus is different and clear. Thus, it is important to make certain of the research question before creating a model.
 
-We propose our goal of this study. We are interested in building an all-in-one model in observable house data and assuming an unobservable temporal effect from the real estate house market. To narrow down on the data usage, the only type of house that we will be researching is a house in Durham, NC, due to the better familiarity of the terrain. There are 4 research questions including 1) how house specific observable, such as number of beds, number of bathrooms, etc. variables affect housing prices, 2) what periodic temporal effects is presented in the past house market, 3) extract past real estate market temporal effects, and 4) make short term forecast of housing prices.
+We propose our goal of this study. We are interested in building an all-in-one model that considers observable house data while also assuming the unobservable temporal effect from the real estate house market. To further narrow down, we are interested in only modeling houses at Durham, NC. Thus, the only type of house that we will be researching is a house in Durham, NC, due to the terrain's better familiarity. There are 4 research questions including 1) how house specific observable, such as number of beds, number of bathrooms, etc. variables affect housing prices, 2) what periodic temporal effects is presented in the past house market, 3) extract past real estate market temporal effects, and 4) making short term forecast of housing prices.
 
 
 \section{1. Exploratory Data Analysis}
 \subsection{1.1 Data description}
 
-The Dataset is scraped from the Redfin official set \href{ https://www.redfin.com/ }{[5]}. Redfin is a real estate brokerage that was founded in 2004. Its website records a historical purchase record of the past 3 years. Therefore, we scraped these 3 years of data recorded for North Carolina, ranging from 2017 April to 2020 May. This dataset contains 6962 observations. Thanks to Redfin's meticulous data record, no missing value in any field was presented. Each observation is a recorded deal of house purchase. Therefore, rather than being subjective such as the seller's one-sided proposed selling price, the price is the recorded real deal price between customer and seller, which is objective enough for us to fit on. 
+The Dataset is scraped from the Redfin official set \href{ https://www.redfin.com/ }{[5]}. Redfin is a real estate brokerage that was founded in 2004. Its website records all of Redfin's historical house purchase in the past 3 years. Therefore, we scraped these 3 years of data recorded for North Carolina, ranging from 2017 April to 2020 May. This dataset contains 6962 observations. Thanks to Redfin's meticulous data management, no missing value in any field was presented. Each observation is a recorded deal of house purchase. Therefore, rather than being subjective such as the seller's one-sided proposed selling price, the price is the real deal price between customer and seller, which is objective enough for us to fit the model on.
 
-The data set contains many covariates. There are some hard-to-process string information, such as the name of the community, and highly detailed geographical information beyond our interests. Therefore, to simplify our research, we introduce the following covariates of our interest.
+The dataset contains many covariates. There are some hard-to-process string information, such as the name of the community, and highly detailed geographical information beyond our interests. Therefore, to simplify our research, we introduce the following covariates of our interest.
 
 \begin{table}[h]
 \centering
 \begin{tabular}{lllllllll}
 \hline 
 \textbf{Name}         & \multicolumn{6}{l}{\textbf{Description}}                         & \textbf{Mean}    & \textbf{Standard Deviation} \\ \hline
-\texttt{Price}        & \multicolumn{6}{l}{the deal price of the house}                  &  319702.000      & 18926.533        \\
+\texttt{Price}        & \multicolumn{6}{l}{the deal price (dollar) of the house}                  &  319702.000      & 18926.533        \\
 \texttt{beds}         & \multicolumn{6}{l}{number of beds in the house}                  &  3.784           & 0.742           \\
 \texttt{sold.dat}     & \multicolumn{6}{l}{the date on which the deal is settled}        &  not meaningful  & not meaningful  \\
 \texttt{baths}        & \multicolumn{6}{l}{the number of bathrooms the house has}        &  2.825           & 0.661            \\
 \texttt{square.feet}  & \multicolumn{6}{l}{usable area (ft$^2$) measured in square feet} &  2437.000        & 907.523          \\
 \texttt{lot.size}     & \multicolumn{6}{l}{total area (ft$^2$) of the lot}               &  10275.000       & 1501.712          \\
 \texttt{house.age}    & \multicolumn{6}{l}{age (years) of the house when purchased}      &  10.710          & 9.852            \\
-\texttt{property.type}& \multicolumn{6}{l}{Townhouse, or Single family residential}      &  not available   & not available   \\
+\texttt{property.type}& \multicolumn{6}{l}{Condo, Townhouse, or Single-Family residential}      &  not available   & not available   \\
 \texttt{latitude}     & \multicolumn{6}{l}{latitude of the house}                        &  35.962          & 0.054          \\
 \texttt{longitude}    & \multicolumn{6}{l}{longitude of the house}                       &  -78.861         & 0.061          \\ \hline
 \end{tabular}
@@ -146,7 +146,7 @@ onlyDurham$date.date <- mdy(onlyDurham$sold.dat)
 onlyDurham$house.age <- year(onlyDurham$date.date) - onlyDurham$year.built
 ```
 
-The first impression is that the distribution of house types in category Condo, Townhouse, and Single Family Residential is highly uneven. This is shown in Appendix figure \ref{fig:uneven class}. Besides, A complete pairwise-plot has also been attached in the Appendix in figure \ref{fig:pair}. The rest of the following section will include 3 subsections explaining the 3 major concerns about data assumption, including suggestions on how to address them. Besides, an additional subsection is also added to explain the engineering of additional predictors and addresses of interactions.
+The first impression is that the distribution of house types in category Condo, Townhouse, and Single Family Residential is highly uneven. This is shown in Appendix figure \ref{fig:uneven class}. Besides, A complete pairwise-plot has also been attached in the Appendix in figure \ref{fig:pair}. The rest of the following section will include 3 subsections explaining the 3 major concerns about data assumption, including suggestions on how to address them. Besides, an additional subsection is also added to explain the engineering of additional predictors and how we address interactions.
 
 ```{r property type count bar plot, include=F, fig.width=4, fig.height=2}
 house_type <- ggplot(data=onlyDurham, aes(x = property.type, fill=property.type), ) + geom_bar( stat = "count") + theme(axis.title.x = element_blank())
@@ -201,7 +201,7 @@ for (i in 1:length(numericNamesIdx)) {
 
 \subsubsection{1.2.1 Multi-collinearity}
 
-The number of bathrooms of the house has a very strong linear correlation with the total square feet the house has. Notice that in figure 1.2.1 below, strong collinearity is shown between the number of baths and square feet of the house, achieving a correlation of 0.7843. Though they're not high enough for us to concern about identifiability issues, we should still be careful in the final model output for these highly correlated covariates. The more pairwise distribution between variables can be found in the pair plot shown in Appendix at figure \ref{fig:pair}
+The number of bathrooms of the house has a very strong linear correlation with the total square feet the house has. Notice that in figure 1.2.1 below, strong collinearity is shown between the number of baths and square feet of the house, achieving a correlation of 0.7843. Though they're not high enough for us to concern about identifiability issues, we should still be careful in the final model output for these highly correlated covariates. More pairwise relationships between variables can be found in the pair plot shown in Appendix at figure \ref{fig:pair}
 
 ```{r Collinearity, echo=F, fig.align="center", fig.height=2.5, fig.width=5}
 # cor(onlyDurham$baths, onlyDurham$square.feet)
@@ -212,9 +212,9 @@ Collinearity
 
 \subsubsection{1.2.2 Heteroscedasticity}
 
-While some strong collinearity and correlation are evident among some predictor variables, such as `beds`, the number of beds, and `square.feet`, the usable area of the house, accompanied by the increase in these predictor and response values is the increase of variance. Surely enough, bigger and more expensive houses exhibit greater variation in price. This violates the linear regression homoscedasticity assumption, as shown in figure 1.2.2 below. To address this, we perform log-transformation on the response variable and create a final regression response variable `log.price`, which is the logarithm of the house deal price. As shown in the pair-plot's last line, the Heteroscedasticity problem is resolved without harming the linear relationship between the response and predictors. It has also made some linear relationships more evident.
+Apart from some strong collinearity and high correlation between covariates, heteroscedasticity is also evident in this dataset. We found that the increase in these predictors' values and response value leads to increased variance. Surely enough, bigger and more expensive houses exhibit greater variation in price. This violates the linear regression homoscedasticity assumption, as shown in figure 1.2.2 below. To address this, we perform log-transformation on the response variable and create a final regression response variable `log.price,` which is the logarithm of the house deal price. As shown in the last line of the pair plot, the Heteroscedasticity problem is resolved without harming the response and predictors' linear relationship. It has also made some linear relationships more evident.
 
-```{r Heteroskedasticity, echo=F, warning=F, fig.align = 'center',fig.height=2.5, fig.width=8}
+```{r Heteroskedasticity, echo=F, warning=F, fig.align = 'center',fig.height=3.5, fig.width=8}
 
 bed_price <- ggplot(onlyDurham, aes(x=beds, y=price, color = property.type)) + 
              geom_point(alpha=0.2) +
@@ -241,7 +241,7 @@ gridExtra::grid.arrange(bed_price, bed_log.price, ncol=2, top="Salce Price by # 
 
 \subsubsection{1.2.3 Stationarity}
 
-When determining the model to capture the temporal effect, it is imperative to verify whether the stationarity assumption has been satisfied. In our case, due to the fact it is unlikely that there are houses sold each day, we need to construct the time series by windowing the raw data -- that is, we treat all the real estate deals that happened in a time window as deals happening at the same timestep. By specifying our window's width, we can modulate and balance between flexibility in temporal effect and validity of regression coefficients. At this point, we choose window width to be 15 days.
+When determining what model to capture the temporal effect, it is imperative to verify whether the stationarity assumption has been satisfied. In our case, due to the fact it is unlikely that there are houses sold each day, we need to construct the time series by windowing the raw data -- that is, we treat all the real estate deals that happened in a time window as deals happening at the same timestep. By specifying our window's width, we can modulate and balance between flexibility in temporal effect and validity of regression coefficients. At this point, we choose window width to be 15 days.
 
 
 ```{r make windowed data, include=F, warning=F}
@@ -286,9 +286,9 @@ ggplot(data=onlyDurham, aes(group=win.date, y=log.price)) + theme(legend.positio
 
 ```
 
-Under the 15-day window size, from figure 1.3.2 (a), we learn that there is a slight upward trend in the distribution of the logarithm of house prices through time. Though this figure can only show the distribution of log price marginalized out by all other exogenous variables, it is helpful for us to identify a linearly increasing time trend. Facing the slightly non-stationarity upward trend, we propose 2 model choices: 1) ignore (no trend model), 2) adding `sold.dat` (linear trend model), the sold date, into the linear observation model as a predictor in order to capture the linear trend using the linear model. We will fit these 2 models and determine the final model by checking their performance and validation results.
+Under the 15-day window size, from figure 1.3.2 (a), we learn that there is a slight upward trend in the distribution of the logarithm of house prices through time. Though this figure can only show the distribution of log price marginalized out by all other exogenous variables, it is helpful for us to identify a linearly increasing time trend. Facing the slightly non-stationarity upward trend, we propose 2 model choices: 1) ignore (no trend model), 2) adding variable `sold.dat`, the sold date, into the linear observation model as a predictor in order to capture the linear trend using the linear model (linear trend model). We will fit these 2 models and determine the final model by checking their performance and validation results.
 
-Besides, it would also help identify the number of lags $p$ by 1) checking ACF/PACF plots and 2) making a hypothesis. Below in figure 1.3.2 (b) shows the ACF/PACF plot mentioned. We observe that lag 1,2,3 are statistically significantly correlated. Therefore, we should at least propose have $p\geq 3$. However, as we also hold the hypothesis that house prices might perform cycles of a very long period, we further extend $p\geq 12$ given that a window is now defined to be 15 days. Therefore, we will start by incorporating 12 auto-correlation terms in our model. Due to the excess amount of lags, we will design Bayesian ridge shrinkage before AR(p) coefficients are explained in appendix section A.
+Besides, it would also help identify the number of lags $p$ by 1) checking autocorrelation and partial autocorrelation (ACF/PACF) plots and 2) making a hypothesis. Below in figure 1.3.2 (b) shows the ACF/PACF plot mentioned. We observe that lag 1,2,3 are statistically significantly correlated. Therefore, we should at least propose have $p\geq 3$. However, as we also hold the hypothesis that house prices might perform cycles of a very long period, we further extend $p\geq 12$ given that a window is now defined to be 15 days. Therefore, we will start by incorporating 12 auto-correlation terms in our model. Due to the excess amount of lags, we will design Bayesian ridge shrinkage for AR(p) coefficients. Details are fully explained in Appendix section A.
 
 
 ```{r ggplot PACF plot func, include=F, warning=F}
@@ -382,7 +382,7 @@ temp
 
 We hypothesize that an excessive number of beds in a house with a comparatively low number of bathrooms can impact house prices. Therefore, we created the variable `room.Diff`, which means how much more bathrooms the house has than beds. We found such feature creates distinct effects across Single Family Residential, Townhouse, and Condo in affecting log of price. In figure 1.2.4 (a), we can observe a different slope of the variable for 3 types of houses. Therefore, together with `room.Diff`, interactions between the bed-bath difference and house type should also be added to our model.
 
-Lastly, we believe that incorporating a simple spatial effect covariable can increase prediction power. Therefore, we engineered the new variable `dist.duke`, indicating the house's distance to Duke. This is calculated by a package called `mapdist`. It has the full map of the US. and draws and calculated the shortest route between 2 addresses. Such an address is inferred from latitude and longitude. Duke University. Then, as figure 1.2.4 (b) shows, aligned with our conjecture, we anticipate a longer distance to Duke, leading to a lower housing price.
+Lastly, we believe that incorporating a simple distance to Duke covariable can increase prediction power, as we are modeling house prices at Durham. Therefore, we engineered the new variable `dist.duke`, indicating the house's road distance to Duke. This is calculated by a package called `mapdist`. It has a full map of the US. .  By drawing the shortest route between 2 addresses, the package calculates their road distances. Such an address is inferred from latitude and longitude. The package will locate the street closest to the given longitude and latitude. We use this procedure to calculate road distances between each house and Duke. Then, as figure 1.2.4 (b) shows, aligned with our conjecture, we anticipate a longer distance to Duke, leading to a lower housing price.
 
 
 ```{r Interaction and bed difference, echo=F, warning=F, fig.height=3, fig.width=8,fig.align = 'center', message=F}
@@ -410,7 +410,7 @@ gridExtra::grid.arrange(interactionplot, distanceplot, ncol=2)
 
 \section{2 Model Formulation}
 
-We define our model as a regression model on top of an AR(P) model. After EDA, we determine response to be the logarithm of the house deal price. The predictors are the number of beds, the number of bathrooms, total square feet of the house, the entire size of the lot, house's age, the type of the house (condo, single-family residential, or townhouse), the difference between beds and bathrooms, distance to Duke, sold date (plus 1 for 1 day later), and finally interaction between house type and the bed-bath difference. Besides, we define the intercept $\alpha_t$ as the time-varying not observable "market effect." The transition of $\alpha_t$ follows an AR(p) process. Therefore, the full model is defined as below. (\textbf{Note:} This model has incorporated sold date as a predictor. This corresponds to the linear trend model mentioned in EDA 1.2.3 about stationarity. To construct the ignore trend model, remove sold date together with its $\beta$ coefficient)
+We define our model as a regression model on top of an AR(p) model. After EDA, we determine response to be the logarithm of the house deal price. The predictors are the number of beds, the number of bathrooms, total square feet of the house, the entire size of the lot, house's age, the type of the house (condo, single-family residential, or townhouse), the difference between beds and bathrooms, distance to Duke, sold date (plus 1 for 1 day later), and finally interaction between house type and the bed-bath difference. Besides, we define the intercept $\alpha_t$ as the time-varying not observable "market effect." The transition of $\alpha_t$ follows an AR(p) process. Therefore, the full model is defined as below. (\textbf{Note:} This model has incorporated sold date as a predictor. This corresponds to the linear trend model mentioned in EDA 1.2.3 about stationarity. To construct the ignore trend model, remove sold date together with its $\beta$ coefficient)
 
 \begin{align}
     \log(\text{house price})^{(i)} &= y_t^{(i)}\\
@@ -482,9 +482,26 @@ Through reparametrization, we can simplify the model as the following. A detaile
 
 This section explores the methodology of using MCMC sampling with the forward-backward algorithm to make inference on parameters. Besides, we will also discuss how the methodology and the inferred parameter posterior distribution could answer our pre-stated 4 research questions in the introduction. 
 
-The Model requires making statistical inference of the following parameters: $\{w, v, \bbeta, \btheta, \balpha_{1:T}\}$, where $T$ is the last timestep index. To obtain these, we choose to apply MCMC sampling with the forward-backward algorithm within the MCMC sampler. In Appendix F is the algorithm that returns MCMC samples for these parameters. A highly detailed derivation of each step's sampling distribution can be found in appendix A. Notice that to apply MCMC, we must design a prior distribution for all the parameters. Due to the flexibility of prior design and our previous sections stated multicollinearity problem, we have decided to propose Bayesian Ridge regression priors for both the AR($p$) coefficients $\btheta$ and also the linear regression model $\bbeta$ coefficients. Details can also be found in Appendix A. From now on, denote $\cD_t := \{\bm{X}_{1:t},\bm{y}_{1:t}\}$, all the information in the observed data from initial time to time $t$.
+The Model requires making statistical inference of the following parameters: $\{w, v, \bbeta, \btheta, \balpha_{1:T}\}$, where $T$ is the last timestep index. To obtain these, we choose to apply MCMC sampling with the forward-backward algorithm within the MCMC sampler. In Appendix F and below is the algorithm that returns MCMC samples for these parameters. A highly detailed derivation of each step's sampling distribution can be found in appendix A. Notice that to apply MCMC, we must design a prior distribution for all the parameters. Due to the flexibility of prior design and our previous sections stated multicollinearity problem, we have decided to propose Bayesian Ridge regression priors for both the AR($p$) coefficients $\btheta$ and also the linear regression model $\bbeta$ coefficients. Details can also be found in Appendix A. From now on, denote $\cD_t := \{\bm{X}_{1:t},\bm{y}_{1:t}\}$, all the information in the observed data from initial time to time $t$.
 
 We have proposed 4 research questions at the end of the introduction section. A detailed explanation of how our inferred parameters will address each research question has been included in Appendix F subsection F.1. 
+
+
+
+\begin{algorithm}[H]
+\SetAlgoLined
+\KwResult{Sampling distribution for $\{w, v, \bbeta, \btheta, \balpha_{1:T}\}$}
+\textbf{Initialize}: $\bP((\theta_1, \dots, \theta_p)^\top ), \bP(w), \bP(v)$ via pre-set prior distribution \\
+\While{not converged}
+ {
+    \textbf{Calculate}: posterior mean and covariance for $\balpha_{t} | \cD_t$: $m_{t}, C_{t}$ $\forall t \in {1: T}$ via forward filtering algorithm in Appendix \\
+    \textbf{Sample}: $\balpha_{t} | \cD_T$ from $m_{t}^*, C_{t}^*, \forall t \in {1: T}$ by backward smoothing\\
+    \textbf{Sample}: $\btheta ,(\phi = w^{-1}) | \bX, \cD_T, \bbeta$ by first sampling $(\phi = w^{-1}) | \bX, \cD_T, \bbeta$ and then $\btheta | \bX, \cD_T, \bbeta, \phi$ \\
+    \textbf{Sample}: $\bbeta ,(\tau = v^{-1}) | \bX, \cD_T, \btheta$ by first sampling $(\tau = v^{-1}) | \bX, \cD_T, \btheta$ and then $\bbeta | \bX, \cD_T, \btheta, \tau$
+ }
+\textbf{Return}: samples of $w, v, \bbeta, \btheta_{1:T}$
+\caption{parameter inference algorithm}
+\end{algorithm}
 
 
 <!-------------------------------------------MODELING--------------------------------------------->
@@ -496,7 +513,7 @@ We have proposed 4 research questions at the end of the introduction section. A 
 
 \subsection{4.1 Model Validation}
 
-To validate the model, we have developed a 3 way splitting of total data, which includes 1) the training set, 2) the in-sample testing set, and 3) the (out-of-sample) forecast testing set. Explicitly, using 15 days as the size of the window, there are 75 windows of data. To obtain the forecast testing set, we take the last 5 windows of data, incorporating 239 observed house deals, as our forecast testing set. After we trained our model using the prior 70 windows of data, we will forecast these 5 windows of data to test our out-of-sample model forecasting performance. To obtain the in-sample testing set, we randomly pick 20$\%$ of house deal observation from each of the first 70 windows, incorporating 537 observed house deals, to form the in-sample testing set. The rest of the data forms the training set. We make inferences on parameters based on the training set and predict the in-sample testing set. Such an error is the in-sample prediction error. In short, we will validate both the in-sample prediction MAE and also the out-of-sample forecast MAE, and we expect the latter to be slightly greater than the former. Such a validation result is in Table 5 of Appendix C.4. We observe that in-sample prediction error is smaller for both no trend and linear trend model. Nevertheless, the out-of-sample error increased more for the no trend model compared to the linear trend model, denoting that the no trend model is not doing and the linear trend model. This is just as anticipated. However, generally, the MAE of both models is still acceptable, as the error of predicting and forecasting house prices is usually not going beyond 500 dollars. An illustration of the data split is shown below.
+To validate the model, we have developed a 3 way splitting of total data, which includes 1) the training set, 2) the in-sample testing set, and 3) the (out-of-sample) forecast testing set. Explicitly, using 15 days as the size of the window, there are 75 windows of data. To obtain the forecast testing set, we take the last 5 windows of data, incorporating 239 observed house deals, as our forecast testing set. After we trained our model using the training set of data, we will forecast these 5 windows of data to test our out-of-sample model forecasting performance. To obtain the in-sample testing set, we randomly pick 20$\%$ of house deal observation from each of the first 70 windows, incorporating 537 observed house deals, to form the in-sample testing set. The rest of the data forms the training set. We make inferences on parameters based on the training set and predict the in-sample testing set. Such an error is the in-sample prediction error. In short, we will validate both the in-sample prediction mean absolute error (MAE) and also the out-of-sample forecast MAE, and we expect the latter to be slightly greater than the former. Such a validation result is in Table 5 of Appendix C.4. We observe that in-sample prediction error is smaller for both no trend and linear trend model. Nevertheless, the out-of-sample error increased more for the no trend model compared to the linear trend model, denoting that the no trend model is not doing as well in forecast as and the linear trend model. This is just as anticipated. However, generally, the MAE of both models is still acceptable, as the error of predicting and forecasting house prices is usually not going beyond 500 dollars. An illustration of the data split is shown below.
 
 ![Illustration of 3 way data split](validation_show.png)
 
@@ -525,9 +542,9 @@ calPeriod <- function(eigens){
 
 \subsection{4.2 Model Results}
 
-Just as the model itself, the results are abundant. For the first questions, the modeling results are all in Table 3 in Appendix C. Interpretations are the same as that of the linear model. For instance, holding all else constant, having 1 more bed in the same house will make the median of the house price decrease to $e^{-0.13}$ multiplicative factor, which is about 89.34 percent; holding all else constant, having 1 more bathroom will make the median of the house price increase to $e^{0.21}$ multiplicative factor, which is 123.36 percent. Interaction terms can also be interpreted. For example, holding all else constant, if a house is a townhouse, then having even one more bed than bathroom will make the median of the house to decrease to $e^{0.415 - 0.599}$ multiplicative factor, which is reduced to the surprising 0.5627 percent. However, if the house is a single-family house, then having even one more bed than the bathroom will make the house's median to decrease to $e^{0.415 - 0.550}$ multiplicative factor, which is reduced to 87.37 percent. Lastly, for the linear trend model, we want to speak for the `sold.dat` coefficient. For the same house, regardless of market periodicity, we expect the house to be sold at $e^{0.0001387} = 100.0139\%$ its price the day before. To provide a better idea of annual house market inflation, we expect the same house to be sold $5.17\%$ more expensive than it was in the last year (calculated without taking consideration of amortization. Aka. not taking account of the increase of the house age variable `house.age`), which is than twice of the federal reserve rate. For houses in a city like Durham, this surely is a very reasonable estimate. Due to the page limit, we only show some examples in this section. Complete interpretation can be found in Appendix C.1 below Table 3.
+Just as the model itself suggests, we have an abundance of results. For the first research questions, the modeling results are all in Table 3 in Appendix C. Interpretations are the same as that of the linear model. For instance, holding all else constant, having 1 more bed in the same house will make the median of the house price decrease to $e^{-0.13}$ multiplicative factor, which is about 89.34 percent; holding all else constant, having 1 more bathroom will make the median of the house price increase to $e^{0.21}$ multiplicative factor, which is 123.36 percent. Interaction terms can also be interpreted. For example, holding all else constant, if a house is a townhouse, then having even one more bed than bathroom will make the median of the house to decrease to $e^{0.415 - 0.599}$ multiplicative factor, which is reduced to the surprising 0.5627 percent. However, if the house is a single-family house, then having even one more bed than the bathroom will make the house's median to decrease to $e^{0.415 - 0.550}$ multiplicative factor, which is reduced to 87.37 percent. Lastly, for the linear trend model, we want to speak for the `sold.dat` coefficient. For the same house, regardless of market periodicity, we expect the house to be sold at $e^{0.0001387} = 100.0139\%$ its price the day before. To provide a better idea of annual house market inflation, we expect the same house to be sold $5.17\%$ more expensive than it was in the last year (calculated without taking consideration of amortization. Aka. not taking account of the increase of the house age variable `house.age`), which is than twice of the federal reserve rate. For houses in a city like Durham, this surely is a very reasonable estimate. Due to the page limit, we only show some examples in this section. Complete interpretation can be found in Appendix C.1 below Table 3.
 
-The second model result is about house market periodicity. From Table 4 in Appendix C.2, we learn that the housing market shows 2-month, 4-month, annual, and seasonal periodicity, with the order from the most significant to the least significant. I conjecture that 4 months is the Duke university semester cycle, with the spring semester, summer, and fall semester nearly equally partitioning the entire school year. Therefore, it is reasonable that house prices may adjust with this 4-month cycle. The 2-month cycle might also be part of the 4-month periodicity as the periodicity need not be of a standard sine wave. The annual and seasonal periodicity is very intuitive as it is common sense that there could be business cycles and the annual economic cycle that impacts the house price.
+The second model result is about house market periodicity. From Table 4 in Appendix C.2, we learn that the housing market shows 2-month, 4-month, annual, and seasonal periodicity, with the order from the most significant to the least significant. I conjecture that 4 months is the Duke university semester cycle, with the spring semester, summer, and fall semester nearly equally partitioning the entire school year. Therefore, it is reasonable that house prices may adjust with this 4-month cycle. The 2-month cycle might also be part of the 4-month periodicity as the periodicity need not be of a standard sine wave. The annual and seasonal periodicity is very intuitive as it is common sense that there could be seasonal business cycles and the annual economic cycle that impacts the house price.
 
 Our result for research question 3, the market movement, can be found in Appendix C.3, and our final forecasts are in Appendix C.4 Table 5, which has already been discussed in model validation section 4.1.
 
@@ -603,10 +620,10 @@ print(n_test)
 ```
 
 ```{r start-MCMC-notrend, include=F, results='hide'}
-total_itr = 100 #60000  #1000000
+total_itr = 60000  #1000000
 kappa = 0.1
 p = 12
-take <- 50 #1000  #1000
+take <- 1000  #1000
 longer_no_trend <- 6065
 longer_linear_trend <- 16041
 
@@ -768,39 +785,39 @@ market_traj_linearTrend <- ggplot(data=melt(toplot_alphas), aes(x=variable, y=va
 
 \subsection{5.1 Model Diagnostics}
 
-Our diagnostic procedure for model diagnostics is 2-fold since the model is essentially a combination of 2 models, the linear observation model, and the time-series evolution model. Thus, diagnostics should satisfy assumptions for both models.
+Our diagnostic procedure for model diagnostics is 2-fold since the model is essentially a combination of 2 models, the linear observation model, and the time-series evolution model. Thus, diagnostics should evaluate whether assumptions for both models are met.
 
 For the linear observation model, we have plotted the residual plot of linear regression. In Appendix D.1 figure \ref{fig:res no trend} and D.2 figure \ref{fig:res linear}, the x-axis represents index of the houses observations. We observe that all of them have constant variance, centered at zero, homoskedastic, and are Gaussian distributed. Thus, the assumption for the linear regression model is satisfied. 
 
-Besides, by checking the posterior distribution of Table 3 in Appendix C.1, it is recognizable that all the variables have a 95% credible interval, not intersecting 0. Thus, we are confident that all the linear regression parameters show some predictive power to the house price's logarithm.
+Besides, by checking the posterior distribution of Table 3 in Appendix C.1, it is recognizable that all the variables have a 95% credible interval not intersecting 0. Thus, we are confident that all the linear regression parameters show some predictive power to the house price's logarithm.
 
 For the evolution model, due to its latency, we cannot diagnose the autoregressive residuals. However, as the parameters are inferred from MCMC, it is necessary to check the convergence of MCMC. In Appendix D.1 and figure \ref{fig:MCMC no trend} and in D.2 figure \ref{fig:MCMC linear}, we surely observe the MCMC has well mixed. Hence our model satisfies all the required assumptions.
 
 \subsection{5.2 Sensitivity Analysis}
 
-Thanks to Bayes Ridge, we do not need to perform sensitivity analysis on the shrinkage coefficient $\kappa$. 
+Thanks to Bayes Ridge, we do not need to perform sensitivity analysis on the shrinkage coefficient $\kappa$, as we've placed an objective prior on it. Besides, all model coefficients have shown significance, therefore not sensitivity analysis is needed. All priors we set for parameters are objective and flat. Thus, sensitivity check for priors are also not necessary. In short, the model doesn't have any strong assumptions, whose impact on modeling results should be tested.
 
-In this section, the major sensitivity concern is about the window size previously mentioned in section 1.2.3. We preset the window size to be 15 days. However, we are concerned about whether increasing the window size to 30 days will improve our model. Although the 30-day window is a more reasonable time-varying window size for real estate prices in our context, increasing the window size can dramatically decrease the effective sample size for AR(p) process as the total number of windows decreased. Besides, MCMC does not mix well when the effective sample size becomes small, which pillaged the model's ability to make a reasonable inference. Below is the validation error of 30 days of windows size. Comparing to the error of 15 days window size model included in Appendix C.4, a longer window does not perform well. Therefore it should not be used. 
+In this section, the major sensitivity concern is about the window size previously mentioned in section 1.2.3. We preset the window size to be 15 days. However, we are concerned about whether increasing the window size to 30 days will improve our model. Although the 30-day window is a more reasonable time-varying window size for real estate prices in our context, increasing the window size can drastically decrease the effective sample size for AR(p) process as the total number of windows decreased. Besides, MCMC does not mix well when the effective sample size becomes small, which pillaged the model's ability to make a reasonable inference. Below is the validation error of 30 days of windows size. Comparing to the error of 15 days window size model included in Appendix C.4, a longer window does not perform well. Therefore it should not be used. 
 
 ```{r sensitivity analysis window size, echo=F}
 
 longer <- data.frame(longer_no_trend,longer_linear_trend)
 names(longer) <- c("no trend", "linear trend")
 
-kbl(longer, caption = "1 step forecast MAE for 2 models using 30 days as window size") %>% 
+kbl(longer, caption = "1 step forecast MAE for 2 models using 30 days as window size (out-of-sample error)") %>% 
   kable_styling(latex_options = "striped") %>%
   kable_styling(latex_options = "HOLD_position")
 ```
 
 \section{6 Discussion}
 
-Our model shows superior flexibility in integrated modeling observable factors impacting house prices and the not observable market's impact on house prices. Prior could be designed specifically for all parameters to enable shrinkage or even other functionalities. By incorporating the house's sell date in the linear observation model, we can overcome the stationarity assumption of the AR(p) model without causing identifiability issues. Therefore, this model is properly functional and can provide interval estimates for all coefficients. Besides, more variables and effects can be constantly added to the model to boost predictive power further.
+Our model shows superior flexibility in integrated modeling observable factors impacting house prices and the not observable market's impact on house prices. Prior could be designed specifically for all parameters to enable shrinkage or even other functionalities. By incorporating the house's sell date in the linear observation model, we can overcome the stationarity restriction of the AR(p) model without causing identifiability issues. Therefore, this model is properly functional and can provide interval estimates for all coefficients. Besides, more variables and effects can be constantly added easily to the model to boost predictive power further.
 
-One limitation is that the model currently only assumes a linear trend of all time. This need not be true. A way to solve this is by applying the DLM framework and adding locally linear dynamics into the $\bTheta$ matrix. Higher orders of trend can also be considered, such as locally quadratic or cubic dynamics. Therefore, we need not worry about the model not capturing the complex trend, as, by Stone Weierstrass Theorem, any continuous functions defined on a compact interval can be approximated by countable numbers of polynomials. Thus, any trend can be approximated.
+One limitation is that the model currently only assumes a linear trend of all time. This need not be true. A way to solve this is by applying the DLM framework and adding locally linear dynamics into the $\bTheta$ matrix. Higher orders polynomials to approximate local trend can also be considered, such as locally quadratic or cubic dynamics. Therefore, we need not worry about the model not capturing the complex trend, as, by Stone Weierstrass Theorem, any continuous functions (trend) defined on a compact interval can be approximated by countable numbers of polynomials. Thus, any trend can be approximated as long as it is continuous.
 
-Another limitation is that the time series data we have is not long enough to analyze even longer terms of market periodicity. The length would be to have more than 50 years of house deal data, which is apparently achievable. Thus, to retain enough degrees of freedom, we are forced to narrow down house deal windows to 15 days, therefore providing useful estimates.
+Another limitation is that the time series data we currently have is not long enough to analyze even longer terms of market periodicity. The ideal length would be to have more than 50 years of house deal data, which is apparently achievable. Thus, to retain enough degrees of freedom, we are forced to narrow house deal window size to only 15 days, therefore providing useful estimates.
 
-The final limitation is that the model could have taken in more linear predictors. Community and other geographical information are vital to determine the house price. To further improve this case study, we should have incorporated more of that information. However, due to the time limit and our limited interest, we ignored this potential improvement and decided to focus on the modeling process. 
+The final limitation is that the model could have taken in more linear predictors. Community and other geographical information are vital in determining the house price. To further improve this case study, we should have incorporated more of that information. However, due to the time limit and our limited resources, we ignored this potential improvement and decided to focus on the modeling process.
 
 
 <!-------------------------------------------REFERENCE--------------------------------------------->
